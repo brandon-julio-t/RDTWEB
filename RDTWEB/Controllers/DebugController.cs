@@ -23,7 +23,7 @@ namespace RDTWEB.API
 
         public string OnGet()
         {
-            return string.Join("\n", context.AspNetRoles);
+            return string.Join("\n", context.AspNetUserRoles);
         }
     }
 }

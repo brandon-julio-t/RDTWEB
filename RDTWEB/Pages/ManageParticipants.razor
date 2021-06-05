@@ -1,0 +1,39 @@
+﻿@page "/ManageParticipants"
+
+@attribute [Authorize(Roles = "Admin")]
+
+@using   RDTWEB.Data
+@using Microsoft.AspNetCore.Identity
+
+@inject ApplicationDbContext context
+
+<h3>ManageParticipants</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<IdentityUser> users = new();
+
+    protected override void OnInitialized()
+    {
+        users = context.AspNetUsers.Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM").ToList();
+    }
+}
