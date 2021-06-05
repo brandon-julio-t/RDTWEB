@@ -32,7 +32,7 @@ namespace RDTWEB
                     // Set password with the Secret Manager tool.
                     // dotnet user-secrets set SeedUserPW <pw>
 
-                    var testUserPw = "d3F@uLtP@55w0Rd";
+                    var testUserPw = config["DefaultPassword"];
 
                     SeedData.Initialize(services, testUserPw).Wait();
                 }

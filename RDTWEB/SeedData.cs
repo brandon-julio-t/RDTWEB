@@ -47,6 +47,7 @@ namespace RDTWEB
                 user = new IdentityUser
                 {
                     UserName = UserName,
+                    Email = UserName,
                     EmailConfirmed = true
                 };
                 await userManager.CreateAsync(user, testUserPw);

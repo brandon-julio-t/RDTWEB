@@ -25,8 +25,18 @@
 
         <AuthorizeView Roles="Admin">
             <li class="nav-item px-3">
+                <NavLink class="nav-link" href="ManageQuestions">
+                    <span class="oi oi-question-mark" aria-hidden="true"></span> Manage Questions
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="ManageSchedules">
+                    <span class="oi oi-calendar" aria-hidden="true"></span> Manage Schedules
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
                 <NavLink class="nav-link" href="ManageParticipants">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Manage Participants
+                    <span class="oi oi-people" aria-hidden="true"></span> Manage Participants
                 </NavLink>
             </li>
         </AuthorizeView>

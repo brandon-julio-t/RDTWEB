@@ -1,0 +1,20 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<IdentityUser> userManager 
+
+<tr>
+    <td>@User.Id</td>
+    <td>@User.UserName</td>
+    <td>@User.Email</td>
+    <td>
+        <button type="button" class="btn btn-outline-danger" @onclick="() => OnDelete.InvokeAsync(User)">Danger</button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public IdentityUser User { get; set; }
+
+    [Parameter]
+    public EventCallback<IdentityUser> OnDelete { get; set; }
+}

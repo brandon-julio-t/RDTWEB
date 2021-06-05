@@ -2,12 +2,19 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-@using   RDTWEB.Data
+@using RDTWEB.Data
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Logging
+@using Microsoft.Extensions.Configuration
 
 @inject ApplicationDbContext context
+@inject ILogger<ManageParticipants> logger
+@inject UserManager<IdentityUser> userManager
+@inject IConfiguration config
 
-<h3>ManageParticipants</h3>
+<h3>Manage Participants</h3>
+
+<h4>Participants</h4>
 
 <div class="table-responsive">
     <table class="table table-hover">
@@ -15,25 +22,97 @@
             <tr>
                 <th>ID</th>
                 <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in users)
+            @foreach (var User in Users)
             {
                 <tr>
-                    <td>@user.Id</td>
-                    <td>@user.UserName</td>
+                    <td>@User.Id</td>
+                    <td>@User.UserName</td>
+                    <td>@User.Email</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteUser(User)">Danger</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
 
+<hr />
+
+<h4>Create Participants</h4>
+
+@if (IsSuccess)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @SuccessMessage
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="() => IsSuccess = false">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<EditForm Model="@FormModel" OnSubmit="@CreateUser">
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input @bind-value="FormModel.Username" type="text" class="form-control" id="username" placeholder="Username">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
 @code {
-    private List<IdentityUser> users = new();
+    private List<IdentityUser> Users = new();
+
+    public CreateUserForm FormModel = new();
+    public Boolean IsSuccess = false;
+    public string SuccessMessage = "";
 
     protected override void OnInitialized()
     {
-        users = context.AspNetUsers.Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM").ToList();
+        RefreshUsers();
+    }
+
+    private void RefreshUsers()
+    {
+        Users = context.AspNetUsers.Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM").ToList();
+    }
+
+    public async Task CreateUser()
+    {
+        var user = new IdentityUser
+        {
+            UserName = FormModel.Username,
+            Email = FormModel.Username,
+            EmailConfirmed = true
+        };
+
+        await userManager.CreateAsync(user, config["DefaultPassword"]);
+        await userManager.AddToRoleAsync(user, "Participant");
+
+        FormModel.Username = "";
+        IsSuccess = true;
+        SuccessMessage = "Create User Success.";
+
+        RefreshUsers();
+    }
+
+    public async Task DeleteUser(IdentityUser user)
+    {
+        await userManager.DeleteAsync(user);
+
+        IsSuccess = true;
+        SuccessMessage = "Delete User Success.";
+
+        RefreshUsers();
+    }
+
+    public class CreateUserForm
+    {
+        public string Username { get; set; }
     }
 }
