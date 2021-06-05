@@ -2,8 +2,50 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+@using RDTWEB.Data
+
 <h3>Manage Questions</h3>
 
-@code {
+<div>
+    @foreach (var question in questions)
+    {
+        @if (question.IsEditing)
+        {
+            <div>
+                <h4>@question.Question.Body</h4>
+                <button class="btn btn-outline-dark" @onclick="() => question.IsEditing = false">Done</button>
+            </div>
+        }
+        else
+        {
+            <div>
+                <h4>@question.Question.Body</h4>
+                <button class="btn btn-outline-dark" @onclick="() => question.IsEditing = true">Edit</button>
+            </div>
+        }
 
+        <hr />
+    }
+</div>
+
+<button class="btn btn-primary" @onclick="AddNewQuestion">Add Question</button>
+
+
+@code {
+    private List<QuestionViewModel> questions = new();
+
+    public void AddNewQuestion()
+    {
+        questions.Add(new QuestionViewModel
+        {
+            Question = new Question(),
+            IsEditing = false
+        });
+    }
+
+    public class QuestionViewModel
+    {
+        public Question Question { get; set; }
+        public bool IsEditing { get; set; }
+    }
 }

@@ -6,6 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ApplicationDbContext.cs" />
+    <Compile Remove="BooleanQuestion.cs" />
+    <Compile Remove="EssayQuestion.cs" />
+    <Compile Remove="MultipleChoiceQuestion.cs" />
+    <Compile Remove="Question.cs" />
+    <Compile Remove="WeatherForecast.cs" />
+    <Compile Remove="WeatherForecastService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.6" />
