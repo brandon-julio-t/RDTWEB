@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RDTWEB.Data;
 
 namespace RDTWEB.API
 {
@@ -13,13 +14,16 @@ namespace RDTWEB.API
     [Authorize(Roles = "Admin")]
     public class DebugController : ControllerBase
     {
-        public DebugController()
+        private readonly ApplicationDbContext context;
+
+        public DebugController(ApplicationDbContext context)
         {
+            this.context = context;
         }
 
         public string OnGet()
         {
-            return "debug";
+            return string.Join("\n", context.AspNetRoles);
         }
     }
 }
