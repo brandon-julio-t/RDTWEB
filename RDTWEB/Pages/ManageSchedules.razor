@@ -39,8 +39,8 @@
                     }
                     else
                     {
-                        <td>@(vm.QuestionSet.StartAt?.ToString() ?? "Not Set")</td>
-                        <td>@(vm.QuestionSet.EndAt?.ToString() ?? "Not Set")</td>
+                        <td>@(vm.QuestionSet.StartAt?.ToString() ?? "-")</td>
+                        <td>@(vm.QuestionSet.EndAt?.ToString() ?? "-")</td>
                         <td>
                             <button @onclick="() => vm.IsEditing = true" class="btn btn-secondary">Edit</button>
                         </td>
