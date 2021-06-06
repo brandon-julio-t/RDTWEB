@@ -4,43 +4,158 @@
 
 @using RDTWEB.Data
 
+@inject ApplicationDbContext context
+
+@if (IsSuccess)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Question Set Added Successfully
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="() => IsSuccess = false">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
 <h3>Manage Questions</h3>
 
-<div>
-    @foreach (var question in questions)
+<section>
+    <div class="form-group">
+        <input @bind-value="@QuestionSet.Title" type="text" class="form-control" placeholder="Question Set Title" />
+    </div>
+
+    <hr />
+
+    @foreach (var question in QuestionViewModels)
     {
         @if (question.IsEditing)
         {
             <div>
-                <h4>@question.Question.Body</h4>
-                <button class="btn btn-outline-dark" @onclick="() => question.IsEditing = false">Done</button>
+                <div class="form-group">
+                    <input @bind-value="@question.Question.Body" type="text" class="form-control" placeholder="Question Body" />
+                </div>
+
+                <div class="form-group">
+                    <select @onchange="e => ChangeQuestionType(question.Question, e.Value.ToString())" type="text" class="form-control" placeholder="Question Body">
+                        <option>Multiple Choice</option>
+                        <option>Boolean (true or false)</option>
+                        <option>Multiple Answer List</option>
+                        <option>Essay</option>
+                        <option>Submit File</option>
+                    </select>
+                </div>
+
+                @switch (question.Question.Type)
+                {
+                    case "Multiple Choice":
+                        @for (var i = 0; i < 4; i++)
+                        {
+                            int idx = i;
+
+                            <div class="form-group form-inline">
+                                <input @onchange="() => question.Question.CorrectChoiceIndex = idx" checked="@(question.Question.CorrectChoiceIndex == idx)" class="form-check-input" type="checkbox" />
+                                <input @bind-value="@question.Question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Choice #@(idx + 1)" />
+                            </div>
+                        }
+                        break;
+
+                    case "Boolean (true or false)":
+                        <div class="form-group">
+                            <div class="form-check form-check-inline">
+                                <input @onchange="() => question.Question.BooleanAnswer = true" checked="@question.Question.BooleanAnswer" class="form-check-input" name="boolean-answer" type="radio" id="true">
+                                <label class="form-check-label" for="true">True</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input @onchange="() => question.Question.BooleanAnswer = false" checked="@(!question.Question.BooleanAnswer)" class="form-check-input" name="boolean-answer" type="radio" id="false">
+                                <label class="form-check-label" for="false">False</label>
+                            </div>
+                        </div>
+                        break;
+
+                    case "Multiple Answer List":
+                        @for (var i = 0; i < question.Question.Choices.Count; i++)
+                        {
+                            int idx = i;
+
+                            <div class="form-group form-inline">
+                                <input @onchange="() => question.Question.CorrectChoiceIndex = idx" checked="@(question.Question.CorrectChoiceIndex == idx)" class="form-check-input" type="checkbox" />
+                                <input @bind-value="@question.Question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)" />
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <button @onclick='() => question.Question.Choices.Add("")' class="btn btn-outline-secondary">Add Answer</button>
+                        </div>
+                        break;
+                }
+
+                <button @onclick="() => question.IsEditing = false" class="btn btn-secondary">Done</button>
             </div>
         }
         else
         {
             <div>
-                <h4>@question.Question.Body</h4>
-                <button class="btn btn-outline-dark" @onclick="() => question.IsEditing = true">Edit</button>
+                <h4>@question.Question.Body [@question.Question.Type]</h4>
+                <button @onclick="() => question.IsEditing = true" class="btn btn-secondary">Edit</button>
             </div>
         }
 
         <hr />
     }
-</div>
+</section>
 
-<button class="btn btn-primary" @onclick="AddNewQuestion">Add Question</button>
+<button @onclick="AddNewQuestion" class="btn btn-primary">Add Question</button>
+<button @onclick="SaveQuestionSet" class="btn btn-success">Save</button>
 
 
 @code {
-    private List<QuestionViewModel> questions = new();
+    private List<QuestionViewModel> QuestionViewModels = new();
+
+    public QuestionSet QuestionSet = new();
+    public bool IsSuccess = false;
 
     public void AddNewQuestion()
     {
-        questions.Add(new QuestionViewModel
+        var type = "Multiple Choice";
+        var question = new Question { Type = type };
+
+        ChangeQuestionType(question, type);
+
+        QuestionViewModels.Add(new QuestionViewModel { Question = question, IsEditing = true });
+    }
+
+    public void ChangeQuestionType(Question question, string type)
+    {
+        question.Type = type;
+        question.Choices = new();
+        question.CorrectChoiceIndex = -1;
+
+        int choicesCount = 0;
+
+        if (type == "Multiple Choice")
         {
-            Question = new Question(),
-            IsEditing = false
-        });
+            choicesCount = 4;
+        }
+        else if (type == "Multiple Answer List")
+        {
+            choicesCount = 1;
+        }
+
+        for (var i = 0; i < choicesCount; i++)
+        {
+            question.Choices.Add("");
+        }
+    }
+
+    public void SaveQuestionSet()
+    {
+        QuestionSet.Questions = QuestionViewModels.Select(q => q.Question).ToList();
+        context.Add(QuestionSet);
+        context.SaveChanges();
+
+        QuestionSet = new();
+        QuestionViewModels = new();
+
+        IsSuccess = true;
     }
 
     public class QuestionViewModel

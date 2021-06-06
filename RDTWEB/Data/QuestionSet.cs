@@ -8,7 +8,9 @@ namespace RDTWEB.Data
     public class QuestionSet
     {
         public int Id { get; set; }
-        public DateTime StartAt { get; set; }
-        public DateTime EndAt { get; set; }
+        public string Title { get; set; }
+        public DateTime? StartAt { get; set; } = null;
+        public DateTime? EndAt { get; set; } = null;
+        public List<Question> Questions { get; set; } = new();
     }
 }

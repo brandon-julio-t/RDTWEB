@@ -13,6 +13,7 @@ namespace RDTWEB.Data
         public DbSet<IdentityUser> AspNetUsers { get; set; }
         public DbSet<IdentityUserRole<string>> AspNetUserRoles { get; set; }
         public DbSet<IdentityRole> AspNetRoles { get; set; }
+        public DbSet<QuestionSet> QuestionSets { get; set; }
         public DbSet<Question> Questions { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
