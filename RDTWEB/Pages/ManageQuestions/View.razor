@@ -1,0 +1,29 @@
+﻿@page "/ManageQuestions/{id?}"
+
+@attribute [Authorize(Roles = "Admin")]
+
+@using RDTWEB.Data
+
+@inject ApplicationDbContext Context
+
+<h3>@QuestionSet.Title</h3>
+
+<ol>
+    @foreach (var question in QuestionSet.Questions)
+    {
+        <li>@question.Body [@question.Type]</li>
+    }
+</ol>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    public QuestionSet QuestionSet { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        QuestionSet = Context.QuestionSets.First(QuestionSet => QuestionSet.Id.ToString() == Id);
+        return base.OnInitializedAsync();
+    }
+}

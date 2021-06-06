@@ -7,10 +7,9 @@
 @using Microsoft.Extensions.Logging
 @using Microsoft.Extensions.Configuration
 
-@inject ApplicationDbContext context
-@inject ILogger<ManageParticipants> logger
-@inject UserManager<IdentityUser> userManager
-@inject IConfiguration config
+@inject ApplicationDbContext Context
+@inject UserManager<IdentityUser> UserManager
+@inject IConfiguration Config
 
 <h3>Manage Participants</h3>
 
@@ -34,7 +33,7 @@
                     <td>@User.UserName</td>
                     <td>@User.Email</td>
                     <td>
-                        <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteUser(User)">
+                        <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(User)">
                             Delete
                         </button>
                     </td>
@@ -74,14 +73,15 @@
     public Boolean IsSuccess = false;
     public string SuccessMessage = "";
 
-    protected override void OnInitialized()
+    protected override Task OnInitializedAsync()
     {
         RefreshUsers();
+        return base.OnInitializedAsync();
     }
 
     private void RefreshUsers()
     {
-        Users = context.AspNetUsers.Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM").ToList();
+        Users = Context.AspNetUsers.Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM").ToList();
     }
 
     public async Task CreateUser()
@@ -93,24 +93,24 @@
             EmailConfirmed = true
         };
 
-        await userManager.CreateAsync(user, config["DefaultPassword"]);
-        await userManager.AddToRoleAsync(user, "Participant");
-
         FormModel.Username = "";
         IsSuccess = true;
         SuccessMessage = "Create User Success.";
 
-        RefreshUsers();
+        Users.Add(user);
+
+        await UserManager.CreateAsync(user, Config["DefaultPassword"]);
+        await UserManager.AddToRoleAsync(user, "Participant");
     }
 
-    public async Task DeleteUser(IdentityUser user)
+    public void DeleteUser(IdentityUser user)
     {
-        await userManager.DeleteAsync(user);
+        UserManager.DeleteAsync(user);
 
         IsSuccess = true;
         SuccessMessage = "Delete User Success.";
 
-        RefreshUsers();
+        Users.Remove(user);
     }
 
     public class CreateUserForm

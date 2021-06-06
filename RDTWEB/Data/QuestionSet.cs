@@ -11,6 +11,6 @@ namespace RDTWEB.Data
         public string Title { get; set; }
         public DateTime? StartAt { get; set; } = null;
         public DateTime? EndAt { get; set; } = null;
-        public List<Question> Questions { get; set; } = new();
+        public virtual List<Question> Questions { get; set; } = new();
     }
 }

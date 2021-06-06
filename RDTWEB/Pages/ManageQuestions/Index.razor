@@ -1,0 +1,72 @@
+﻿@page "/ManageQuestions"
+
+@attribute [Authorize(Roles = "Admin")]
+
+@using RDTWEB.Data
+@using Microsoft.EntityFrameworkCore
+@using System.Linq 
+
+@inject ApplicationDbContext Context
+@inject NavigationManager NavManager
+
+<h3>Manage Questions</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vm in QuestionSetViewModels)
+            {
+                <tr>
+                    <td>@vm.QuestionSet.Id</td>
+                    <td>@vm.QuestionSet.Title</td>
+                    <td>@(vm.QuestionSet.StartAt?.ToString() ?? "-")</td>
+                    <td>@(vm.QuestionSet.EndAt?.ToString() ?? "-")</td>
+                    <td class="btn-group" role="group" aria-label="Actions">
+                        <NavLink class="btn btn-secondary" href="@($"/ManageQuestions/{vm.QuestionSet.Id}")">View</NavLink>
+                        <button @onclick="() => OnDelete(vm)" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    public List<QuestionSetViewModel> QuestionSetViewModels = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        RefreshQuestionSets();
+        return base.OnInitializedAsync();
+    }
+
+    private void RefreshQuestionSets()
+    {
+        QuestionSetViewModels = Context.QuestionSets
+            .Include(QuestionSet => QuestionSet.Questions)
+            .Select(QuestionSet => new QuestionSetViewModel { QuestionSet = QuestionSet })
+            .ToList();
+    }
+
+    public void OnDelete(QuestionSetViewModel vm)
+    {
+        QuestionSetViewModels.Remove(vm);
+        Context.Remove(vm.QuestionSet);
+        Context.SaveChangesAsync();
+    }
+
+    public class QuestionSetViewModel
+    {
+        public QuestionSet QuestionSet { get; set; }
+        public bool IsEditing { get; set; } = false;
+    }
+}
