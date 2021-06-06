@@ -2,8 +2,81 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+@using RDTWEB.Data
+
+@inject ApplicationDbContext context
+
 <h3>Manage Schedules</h3>
 
-@code {
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vm in QuestionSetViewModels)
+            {
+                <tr>
+                    <td>@vm.QuestionSet.Id</td>
+                    <td>@vm.QuestionSet.Title</td>
+                    @if (vm.IsEditing)
+                    {
+                        <td>
+                            <input @bind="vm.QuestionSet.StartAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control" />
+                        </td>
+                        <td>
+                            <input @bind="vm.QuestionSet.EndAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control" />
+                        </td>
+                        <td>
+                            <button @onclick="() => UpdateQuestionSetSchedule(vm)" class="btn btn-secondary">Submit</button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>@(vm.QuestionSet.StartAt?.ToString() ?? "Not Set")</td>
+                        <td>@(vm.QuestionSet.EndAt?.ToString() ?? "Not Set")</td>
+                        <td>
+                            <button @onclick="() => vm.IsEditing = true" class="btn btn-secondary">Edit</button>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
+@code {
+    public List<QuestionSetViewModel> QuestionSetViewModels = new();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        RefreshQuestionSets();
+    }
+
+    private void RefreshQuestionSets()
+    {
+        QuestionSetViewModels = context.QuestionSets
+            .Select(QuestionSet => new QuestionSetViewModel { QuestionSet = QuestionSet })
+            .ToList();
+    }
+
+    public void UpdateQuestionSetSchedule(QuestionSetViewModel vm)
+    {
+        context.Update(vm.QuestionSet);
+        context.SaveChanges();
+        vm.IsEditing = false;
+    }
+
+    public class QuestionSetViewModel
+    {
+        public QuestionSet QuestionSet { get; set; }
+        public bool IsEditing { get; set; } = false;
+    }
 }
