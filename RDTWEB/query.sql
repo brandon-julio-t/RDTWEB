@@ -1,3 +1,5 @@
+use master
+go
 drop database if exists rdt
 go
 create database rdt

@@ -1,0 +1,166 @@
+﻿@using RDTWEB.Data
+
+@inject ApplicationDbContext Context
+
+@if (IsEditing)
+{
+    <div class="form-group">
+        <input @bind-value="@Question.Body" type="text" class="form-control" placeholder="Question Body" />
+    </div>
+
+    <div class="form-group">
+        <select @onchange="e => ChangeQuestionType(Question, e.Value.ToString())" type="text" class="form-control" placeholder="Question Body">
+            <option selected='@(Question.Type == "Multiple Choice")'>Multiple Choice</option>
+            <option selected='@(Question.Type == "Boolean (true or false)")'>Boolean (true or false)</option>
+            <option selected='@(Question.Type == "Multiple Answer List")'>Multiple Answer List</option>
+            <option selected='@(Question.Type == "Essay")'>Essay</option>
+            <option selected='@(Question.Type == "Submit File")'>Submit File</option>
+        </select>
+    </div>
+
+    @switch (Question.Type)
+    {
+        case "Multiple Choice":
+            @for (var i = 0; i < 4; i++)
+            {
+                int idx = i;
+
+                <div class="form-group form-inline">
+                    <input @onchange="() => Question.CorrectChoiceIndex = idx" checked="@(Question.CorrectChoiceIndex == idx)" class="form-check-input" type="checkbox" />
+                    <input @bind-value="@Question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Choice #@(idx + 1)" />
+                </div>
+            }
+            break;
+
+        case "Boolean (true or false)":
+            <div class="form-group">
+                <div class="form-check form-check-inline">
+                    <input @onchange="() => Question.BooleanAnswer = true" checked="@Question.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                    <label class="form-check-label" for="true">True</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input @onchange="() => Question.BooleanAnswer = false" checked="@(!Question.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                    <label class="form-check-label" for="false">False</label>
+                </div>
+            </div>
+            break;
+
+        case "Multiple Answer List":
+            @for (var i = 0; i < Question.Choices.Count; i++)
+            {
+                int idx = i;
+
+                <div class="form-group form-inline">
+                    <input @onchange="() => Question.CorrectChoiceIndex = idx" checked="@(Question.CorrectChoiceIndex == idx)" class="form-check-input" type="checkbox" />
+                    <input @bind-value="@Question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)" />
+                </div>
+            }
+
+            <div class="form-group">
+                <button @onclick='() => Question.Choices.Add("")' class="btn btn-outline-secondary">Add Answer</button>
+            </div>
+            break;
+    }
+
+    @if (!IsNew)
+    {
+        <button @onclick="OnEditingDone" class="btn btn-success">Done</button>
+        <button @onclick="() => IsEditing = false" class="btn btn-danger">Cancel</button>
+    }
+}
+else
+{
+    <p class="font-weight-bold">@Question.Body [@Question.Type]</p>
+    @switch (Question.Type)
+    {
+        case "Multiple Choice":
+        case "Multiple Answer List":
+            @for (var i = 0; i < Question.Choices.Count; i++)
+            {
+                int idx = i;
+
+                <div class="form-group form-inline">
+                    <input disabled checked="@(Question.CorrectChoiceIndex == idx)" class="form-check-input" type="checkbox" />
+                    <input disabled value="@Question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)" />
+                </div>
+            }
+            break;
+        case "Boolean (true or false)":
+            <div class="form-group">
+                <div class="form-check form-check-inline">
+                    <input disabled checked="@Question.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                    <label class="form-check-label" for="true">True</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input disabled checked="@(!Question.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                    <label class="form-check-label" for="false">False</label>
+                </div>
+            </div>
+            break;
+    }
+
+    @if (!IsNew)
+    {
+        <div class="btn-group" role="group" aria-label="Actions">
+            <button @onclick="() => IsEditing = true" class="btn btn-secondary">Edit</button>
+            <button @onclick="DeleteQuestion" class="btn btn-danger">Delete</button>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public Question Question { get; set; }
+
+    [Parameter]
+    public bool IsEditing { get; set; } = false;
+
+    [Parameter]
+    public bool IsNew { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<Question> OnDelete { get; set; }
+
+    public void ChangeQuestionType(Question question, string type)
+    {
+        question.Type = type;
+        question.Choices = new();
+        question.CorrectChoiceIndex = -1;
+
+        int choicesCount = 0;
+
+        if (type == "Multiple Choice")
+        {
+            choicesCount = 4;
+        }
+        else if (type == "Multiple Answer List")
+        {
+            choicesCount = 1;
+        }
+
+        for (var i = 0; i < choicesCount; i++)
+        {
+            question.Choices.Add("");
+        }
+    }
+
+    public void OnEditingDone()
+    {
+        IsEditing = false;
+
+        if (!IsNew)
+        {
+            Context.Update(Question);
+            Context.SaveChangesAsync();
+        }
+
+        // if question is new, it will be saved together with Question Set
+    }
+
+    public void DeleteQuestion()
+    {
+        Context.Remove(Question);
+        Context.SaveChangesAsync();
+        OnDelete.InvokeAsync(Question);
+    }
+}

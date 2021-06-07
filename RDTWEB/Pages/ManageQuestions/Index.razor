@@ -3,8 +3,9 @@
 @attribute [Authorize(Roles = "Admin")]
 
 @using RDTWEB.Data
+@using RDTWEB.ViewModels
 @using Microsoft.EntityFrameworkCore
-@using System.Linq 
+@using System.Linq
 
 @inject ApplicationDbContext Context
 @inject NavigationManager NavManager
@@ -40,6 +41,8 @@
     </table>
 </div>
 
+<NavLink href="/ManageQuestions/Create" class="btn btn-primary">Create New Question Set</NavLink>
+
 @code {
     public List<QuestionSetViewModel> QuestionSetViewModels = new();
 
@@ -62,11 +65,5 @@
         QuestionSetViewModels.Remove(vm);
         Context.Remove(vm.QuestionSet);
         Context.SaveChangesAsync();
-    }
-
-    public class QuestionSetViewModel
-    {
-        public QuestionSet QuestionSet { get; set; }
-        public bool IsEditing { get; set; } = false;
     }
 }
