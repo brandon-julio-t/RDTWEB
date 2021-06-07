@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 
 namespace RDTWEB.Data
@@ -15,5 +17,7 @@ namespace RDTWEB.Data
         public virtual IdentityUser User { get; set; }
         public int QuestionId { get; set; }
         public virtual Question Question { get; set; }
+        [NotMapped]
+        public IBrowserFile BrowserFile { get; set; }
     }
 }

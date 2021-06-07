@@ -2,13 +2,18 @@
 
 @attribute [Authorize(Roles = "Admin, Participant")]
 
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
 @using RDTWEB.Data
 
 @inject ApplicationDbContext Context
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<IdentityUser> UserManager
+@inject IWebHostEnvironment Env
+@inject ILogger<TestAnswer> Logger
 
 @if (AreAnswersSaved)
 {
@@ -79,7 +84,7 @@
                     break;
 
                 case "Submit File":
-                    <input type="file" />
+                    <InputFile OnChange="e => question.Answer.BrowserFile = e.File" class="form-control-file" />
                     break;
             }
         </li>
@@ -120,10 +125,27 @@
         return base.OnInitializedAsync();
     }
 
-    public void OnSave()
+    public async Task OnSave()
     {
+        await Task.WhenAll(QuestionSet.Questions.Select(async Question =>
+        {
+            if (Question.Type != "Submit File")
+            {
+                return;
+            }
+
+            var path = Path.Combine("Storage", "Answers", Path.GetRandomFileName());
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await Question.Answer.BrowserFile.OpenReadStream().CopyToAsync(fs);
+
+            Question.Answer.StringAnswer = path;
+        }));
+
+
         Context.Update(QuestionSet);
-        Context.SaveChangesAsync();
+        Context.SaveChanges();
+
         AreAnswersSaved = true;
     }
 }
