@@ -15,6 +15,7 @@ namespace RDTWEB.Data
         public int CorrectChoiceIndex { get; set; } = -1;
         public int QuestionSetId { get; set; }
         public virtual QuestionSet QuestionSet { get; set; }
+        public virtual Answer Answer { get; set; }
 
         public Question()
         {

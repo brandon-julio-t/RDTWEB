@@ -27,7 +27,7 @@ else
     <h3>@QuestionSet.Title</h3>
 }
 
-<ol class="ml-0 pl-0">
+<ol class="ml-3 pl-0">
     @foreach (var question in QuestionSet.Questions)
     {
         <li class="ml-0 pl-0 mb-4">
@@ -59,7 +59,7 @@ else
 
     protected override Task OnInitializedAsync()
     {
-        QuestionSet = Context.QuestionSets.First(QuestionSet => QuestionSet.Id.ToString() == Id);
+        QuestionSet = Context.QuestionSets.Single(QuestionSet => QuestionSet.Id.ToString() == Id);
         return base.OnInitializedAsync();
     }
 

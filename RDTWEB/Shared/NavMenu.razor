@@ -40,6 +40,19 @@
                 </NavLink>
             </li>
         </AuthorizeView>
+
+        <AuthorizeView Roles="Admin, Participant">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="TestSchedules">
+                    <span class="oi oi-pencil" aria-hidden="true"></span> Test Schedules
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="TestResults">
+                    <span class="oi oi-document" aria-hidden="true"></span> Test Results
+                </NavLink>
+            </li>
+        </AuthorizeView>
     </ul>
 </div>
 

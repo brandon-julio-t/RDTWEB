@@ -15,6 +15,7 @@ namespace RDTWEB.Data
         public DbSet<IdentityRole> AspNetRoles { get; set; }
         public DbSet<QuestionSet> QuestionSets { get; set; }
         public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -33,6 +34,9 @@ namespace RDTWEB.Data
             builder.Entity<Question>()
                 .Property(nameof(Question.Choices))
                 .HasConversion(splitStringConverter);
+
+            builder.Entity<Answer>()
+                .HasKey(e => new { e.UserId, e.QuestionId });
         }
     }
 }

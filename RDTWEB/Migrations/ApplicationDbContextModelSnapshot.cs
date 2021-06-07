@@ -219,6 +219,31 @@ namespace RDTWEB.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("RDTWEB.Data.Answer", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("BooleanAnswer")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ChosenIndex")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StringAnswer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "QuestionId");
+
+                    b.HasIndex("QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("Answers");
+                });
+
             modelBuilder.Entity("RDTWEB.Data.Question", b =>
                 {
                     b.Property<int>("Id")
@@ -323,6 +348,25 @@ namespace RDTWEB.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("RDTWEB.Data.Answer", b =>
+                {
+                    b.HasOne("RDTWEB.Data.Question", "Question")
+                        .WithOne("Answer")
+                        .HasForeignKey("RDTWEB.Data.Answer", "QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("RDTWEB.Data.Question", b =>
                 {
                     b.HasOne("RDTWEB.Data.QuestionSet", "QuestionSet")
@@ -332,6 +376,11 @@ namespace RDTWEB.Migrations
                         .IsRequired();
 
                     b.Navigation("QuestionSet");
+                });
+
+            modelBuilder.Entity("RDTWEB.Data.Question", b =>
+                {
+                    b.Navigation("Answer");
                 });
 
             modelBuilder.Entity("RDTWEB.Data.QuestionSet", b =>

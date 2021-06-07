@@ -1,0 +1,129 @@
+﻿@page "/TestAnswer/{id?}"
+
+@attribute [Authorize(Roles = "Admin, Participant")]
+
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using RDTWEB.Data
+
+@inject ApplicationDbContext Context
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+@if (AreAnswersSaved)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Answers saved.
+        <button @onclick="() => AreAnswersSaved = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<h3>Information</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <tr>
+            <th>Title</th>
+            <td>@QuestionSet.Title</td>
+        </tr>
+        <tr>
+            <th>Start At</th>
+            <td>@QuestionSet.StartAt</td>
+        </tr>
+        <tr>
+            <th>End At</th>
+            <td>@QuestionSet.EndAt</td>
+        </tr>
+    </table>
+</div>
+
+<ol class="ml-3 pl-0">
+    @foreach (var question in QuestionSet.Questions)
+    {
+        <li class="ml-0 pl-0 mb-4">
+            <p>@question.Body</p>
+            @switch (question.Type)
+            {
+                case "Multiple Choice":
+                case "Multiple Answer List":
+                    @for (var i = 0; i < question.Choices.Count; i++)
+                    {
+                        var idx = i;
+
+                        <div class="form-group form-inline">
+                            <input @onchange="() => question.Answer.ChosenIndex = idx" checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox" />
+                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)" />
+                        </div>
+                    }
+                    break;
+
+                case "Boolean (true or false)":
+                    <div class="form-group">
+                        <div class="form-check form-check-inline">
+                            <input @onchange="() => question.Answer.BooleanAnswer = true" checked="@question.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                            <label class="form-check-label" for="true">True</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input @onchange="() => question.Answer.BooleanAnswer = false" checked="@(!question.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                            <label class="form-check-label" for="false">False</label>
+                        </div>
+                    </div>
+                    break;
+
+                case "Essay":
+                    <div class="form-group">
+                        <textarea @bind="question.Answer.StringAnswer" class="form-control"></textarea>
+                    </div>
+                    break;
+
+                case "Submit File":
+                    <input type="file" />
+                    break;
+            }
+        </li>
+    }
+</ol>
+
+<button @onclick="OnSave" class="btn btn-success">Save</button>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    public QuestionSet QuestionSet { get; set; }
+    public bool AreAnswersSaved { get; set; } = false;
+
+    protected override async Task<Task> OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        QuestionSet = Context.QuestionSets
+            .Include(QuestionSet => QuestionSet.Questions)
+            .ThenInclude(Question => Question.Answer)
+            .Single(QuestionSet => QuestionSet.Id.ToString() == Id);
+
+        QuestionSet.Questions.ForEach(Question =>
+        {
+            if (Question.Answer != null)
+            {
+                return;
+            }
+
+            Question.Answer = new Answer
+            {
+                UserId = UserManager.GetUserId(state.User)
+            };
+        });
+
+        return base.OnInitializedAsync();
+    }
+
+    public void OnSave()
+    {
+        Context.Update(QuestionSet);
+        Context.SaveChangesAsync();
+        AreAnswersSaved = true;
+    }
+}

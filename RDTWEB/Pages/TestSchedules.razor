@@ -1,0 +1,72 @@
+﻿@page "/TestSchedules"
+
+@attribute [Authorize(Roles = "Admin, Participant")]
+
+@using RDTWEB.Data
+
+@inject ApplicationDbContext Context
+
+<h3>Test Schedules</h3>
+
+<ServerTime />
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Start At</th>
+                <th>End At</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var set in QuestionSets)
+            {
+                <tr class="@GetTrClassByStatus(set)">
+                    <td>@set.Title</td>
+                    <td>@set.StartAt</td>
+                    <td>@set.EndAt</td>
+                    <td>@set.Status</td>
+                    <td>
+                        @if (set.Status == "Ongoing")
+                        {
+                            <NavLink href="@($"/TestAnswer/{set.Id}")" class="btn btn-primary">Answer</NavLink>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    public List<QuestionSet> QuestionSets { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        QuestionSets = Context.QuestionSets
+            .Where(QuestionSet => QuestionSet.StartAt != null)
+            .Where(QuestionSet => QuestionSet.EndAt != null)
+            .ToList();
+
+        return base.OnInitializedAsync();
+    }
+
+    public string GetTrClassByStatus(QuestionSet questionSet)
+    {
+        switch (questionSet.Status)
+        {
+            case "Ongoing": return "bg-success";
+            case "Is Over":
+            case "Not Started":
+            default:
+                return "";
+        }
+    }
+}
