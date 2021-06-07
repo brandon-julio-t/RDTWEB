@@ -168,7 +168,7 @@
     {
         await Task.WhenAll(QuestionSet.Questions.Select(async Question =>
         {
-            if (Question.Type != "Submit File")
+            if (Question.Type != "Submit File" || Question.Answer.BrowserFile == null)
             {
                 return;
             }
@@ -184,6 +184,7 @@
             await Question.Answer.BrowserFile.OpenReadStream(maxAllowedSize: 512000000).CopyToAsync(file);
 
             Question.Answer.StringAnswer = path;
+            Question.Answer.BrowserFile = null;
 
             if (!string.IsNullOrWhiteSpace(previousPath))
             {
