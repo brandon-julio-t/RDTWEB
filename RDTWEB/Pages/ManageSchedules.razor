@@ -23,26 +23,26 @@
             @foreach (var vm in QuestionSetViewModels)
             {
                 <tr>
-                    <td>@vm.QuestionSet.Id</td>
-                    <td>@vm.QuestionSet.Title</td>
+                    <td class="align-middle">@vm.QuestionSet.Id</td>
+                    <td class="align-middle">@vm.QuestionSet.Title</td>
                     @if (vm.IsEditing)
                     {
-                        <td>
+                        <td class="align-middle">
                             <input @bind="vm.QuestionSet.StartAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control" />
                         </td>
-                        <td>
+                        <td class="align-middle">
                             <input @bind="vm.QuestionSet.EndAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control" />
                         </td>
-                        <td class="btn-group" role="group" aria-label="Actions">
+                        <td class="btn-group align-middle" role="group" aria-label="Actions">
                             <button @onclick="() => UpdateQuestionSetSchedule(vm)" class="btn btn-primary">Submit</button>
                             <button @onclick="() => vm.IsEditing = false" class="btn btn-danger">Cancel</button>
                         </td>
                     }
                     else
                     {
-                        <td>@(vm.QuestionSet.StartAt?.ToString() ?? "-")</td>
-                        <td>@(vm.QuestionSet.EndAt?.ToString() ?? "-")</td>
-                        <td>
+                        <td class="align-middle">@(vm.QuestionSet.StartAt?.ToString("U") ?? "-")</td>
+                        <td class="align-middle">@(vm.QuestionSet.EndAt?.ToString("U") ?? "-")</td>
+                        <td class="align-middle">
                             <button @onclick="() => vm.IsEditing = true" class="btn btn-secondary">Edit</button>
                         </td>
                     }

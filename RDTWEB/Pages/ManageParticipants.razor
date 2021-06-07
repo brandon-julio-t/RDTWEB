@@ -29,10 +29,10 @@
             @foreach (var User in Users)
             {
                 <tr>
-                    <td>@User.Id</td>
-                    <td>@User.UserName</td>
-                    <td>@User.Email</td>
-                    <td>
+                    <td class="align-middle">@User.Id</td>
+                    <td class="align-middle">@User.UserName</td>
+                    <td class="align-middle">@User.Email</td>
+                    <td class="align-middle">
                         <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(User)">
                             Delete
                         </button>

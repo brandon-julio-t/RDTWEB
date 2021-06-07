@@ -3,19 +3,8 @@
 @attribute [Authorize(Roles = "Admin")]
 
 @using RDTWEB.Data
-@using RDTWEB.ViewModels
 
 @inject ApplicationDbContext context
-
-@if (IsSuccess)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Question Set Added Successfully
-        <button @onclick="() => IsSuccess = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-}
 
 <h3>Manage Questions</h3>
 
@@ -26,12 +15,22 @@
 
     <hr />
 
-    @foreach (var question in Questions)
+    @for (var i = 0; i < Questions.Count; i++)
     {
-        <ViewQuestion Question="question" IsEditing="true" IsNew="true" />
-        <hr />
+        var question = Questions[i];
+        <ViewQuestion Question="question" Number="i + 1" IsEditing="true" IsNew="true" />
     }
 </section>
+
+@if (IsSuccess)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Question Set Added Successfully
+        <button @onclick="() => IsSuccess = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
 
 <button @onclick="AddNewQuestion" class="btn btn-primary">Add Question</button>
 <button @onclick="SaveQuestionSet" class="btn btn-success">Save</button>

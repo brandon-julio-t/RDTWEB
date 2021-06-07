@@ -25,11 +25,11 @@
             @foreach (var set in QuestionSets)
             {
                 <tr class="@GetTrClassByStatus(set)">
-                    <td>@set.Title</td>
-                    <td>@set.StartAt</td>
-                    <td>@set.EndAt</td>
-                    <td>@set.Status</td>
-                    <td>
+                    <td class="align-middle">@set.Title</td>
+                    <td class="align-middle">@set.StartAt?.ToString("U")</td>
+                    <td class="align-middle">@set.EndAt?.ToString("U")</td>
+                    <td class="align-middle">@set.Status</td>
+                    <td class="align-middle">
                         @if (set.Status == "Ongoing")
                         {
                             <NavLink href="@($"/TestAnswer/{set.Id}")" class="btn btn-primary">Answer</NavLink>
@@ -62,7 +62,7 @@
     {
         switch (questionSet.Status)
         {
-            case "Ongoing": return "bg-success";
+            case "Ongoing": return "bg-success text-white";
             case "Is Over":
             case "Not Started":
             default:

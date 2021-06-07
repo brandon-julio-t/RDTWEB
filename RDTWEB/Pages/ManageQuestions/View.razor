@@ -6,16 +6,6 @@
 
 @inject ApplicationDbContext Context
 
-@if (IsUpdateSuccess)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Update Success.
-        <button @onclick="() => IsUpdateSuccess = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-}
-
 @if (IsEditing)
 {
     <div class="form-group">
@@ -27,14 +17,23 @@ else
     <h3>@QuestionSet.Title</h3>
 }
 
-<ol class="ml-3 pl-0">
-    @foreach (var question in QuestionSet.Questions)
+<section>
+    @for (var i = 0; i < QuestionSet.Questions.Count; i++)
     {
-        <li class="ml-0 pl-0 mb-4">
-            <ViewQuestion Question="@question" OnDelete="q => OnQuestionDeleted((Question) q)" />
-        </li>
+        var question = QuestionSet.Questions[i];
+        <ViewQuestion Question="@question" Number="i + 1" OnDelete="q => OnQuestionDeleted((Question) q)" />
     }
-</ol>
+</section>
+
+@if (IsUpdateSuccess)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Update Success.
+        <button @onclick="() => IsUpdateSuccess = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
 
 @if (IsEditing)
 {

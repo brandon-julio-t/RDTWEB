@@ -27,10 +27,10 @@
             @foreach (var vm in QuestionSetViewModels)
             {
                 <tr>
-                    <td>@vm.QuestionSet.Id</td>
-                    <td>@vm.QuestionSet.Title</td>
-                    <td>@(vm.QuestionSet.StartAt?.ToString() ?? "-")</td>
-                    <td>@(vm.QuestionSet.EndAt?.ToString() ?? "-")</td>
+                    <td class="align-middle">@vm.QuestionSet.Id</td>
+                    <td class="align-middle">@vm.QuestionSet.Title</td>
+                    <td class="align-middle">@(vm.QuestionSet.StartAt?.ToString() ?? "-")</td>
+                    <td class="align-middle">@(vm.QuestionSet.EndAt?.ToString() ?? "-")</td>
                     <td class="btn-group" role="group" aria-label="Actions">
                         <NavLink class="btn btn-secondary" href="@($"/ManageQuestions/{vm.QuestionSet.Id}")">View</NavLink>
                         <button @onclick="() => OnDelete(vm)" class="btn btn-danger">Delete</button>
