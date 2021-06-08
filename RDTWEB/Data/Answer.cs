@@ -18,6 +18,6 @@ namespace RDTWEB.Data
         public int QuestionId { get; set; }
         public virtual Question Question { get; set; }
         [NotMapped]
-        public IBrowserFile? BrowserFile { get; set; } = null;
+        public IBrowserFile BrowserFile { get; set; } = null;
     }
 }

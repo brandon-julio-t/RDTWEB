@@ -1,0 +1,76 @@
+﻿@page "/TestResults"
+
+@attribute [Authorize(Roles = "Admin, Participant")]
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using RDTWEB.Data
+
+@inject ApplicationDbContext Context
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+<h3>Test Result</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Start At</th>
+                <th>End At</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var set in QuestionSets)
+            {
+                <tr class="@GetTrClassByStatus(set)">
+                    <td class="align-middle">@set.Title</td>
+                    <td class="align-middle">@set.StartAt?.ToString("U")</td>
+                    <td class="align-middle">@set.EndAt?.ToString("U")</td>
+                    <td class="align-middle">@set.Status</td>
+                    <td class="align-middle">
+                        <NavLink href="" class="btn btn-primary">View Result</NavLink>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    public List<QuestionSet> QuestionSets { get; set; }
+
+    protected override async Task<Task> OnInitializedAsync()
+    {
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = UserManager.GetUserId(auth.User);
+
+        var sql =
+                "select distinct qs.* " +
+                "from Answers a " +
+                "   join Questions q on a.QuestionId = q.Id " +
+                "   join QuestionSets qs on q.QuestionSetId = qs.Id " +
+                "where a.UserId = {0}";
+
+        QuestionSets = Context.QuestionSets
+            .FromSqlRaw(sql, userId)
+            .ToList();
+
+        return base.OnInitializedAsync();
+    }
+
+    public string GetTrClassByStatus(QuestionSet questionSet)
+    {
+        switch (questionSet.Status)
+        {
+            case "Ongoing": return "bg-success text-white";
+            case "Is Over":
+            case "Not Started":
+            default:
+                return "";
+        }
+    }
+}

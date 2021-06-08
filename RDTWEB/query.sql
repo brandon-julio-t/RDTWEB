@@ -13,4 +13,10 @@ select u.Id, UserName, r.Id, r.Name from
 
 go 
 
-select * from AspNetUsers
+select distinct qs.*
+from Answers a
+	join Questions q on a.QuestionId = q.Id
+	join QuestionSets qs on q.QuestionSetId = qs.Id
+select * from Questions
+select * from Answers
+delete from answers where QuestionId = 10
