@@ -32,7 +32,7 @@
                     <td class="align-middle">@set.EndAt?.ToString("U")</td>
                     <td class="align-middle">@set.Status</td>
                     <td class="align-middle">
-                        <NavLink href="" class="btn btn-primary">View Result</NavLink>
+                        <NavLink href="@($"/TestResults/{set.Id}")" class="btn btn-primary">View Result</NavLink>
                     </td>
                 </tr>
             }

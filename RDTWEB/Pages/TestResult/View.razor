@@ -1,5 +1,97 @@
-﻿<h3>View</h3>
+﻿@page "/TestResults/{id?}"
+
+@attribute [Authorize(Roles = "Admin, Participant")]
+
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using RDTWEB.Data
+
+@inject ApplicationDbContext Context
+@inject IWebHostEnvironment Env
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+<h3>@QuestionSet.Title</h3>
+
+<section>
+    @foreach (var question in QuestionSet.Questions)
+    {
+        <div class="my-4 p-4 border rounded">
+            <p class="font-weight-bold">@question.Body</p>
+
+            @switch (question.Type)
+            {
+                case "Multiple Choice":
+                case "Multiple Answer List":
+                    @for (var i = 0; i < question.Choices.Count; i++)
+                    {
+                        int idx = i;
+
+                        if (question.Answer.ChosenIndex == question.CorrectChoiceIndex)
+                        {
+                            CorrectAnswers++;
+                        }
+
+                        <div class="form-group form-inline">
+                            <input disabled checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox" />
+                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)" />
+                        </div>
+                    }
+                    break;
+
+                case "Boolean (true or false)":
+                    if (question.BooleanAnswer == question.Answer.BooleanAnswer)
+                    {
+                        CorrectAnswers++;
+                    }
+
+                    <div class="form-group">
+                        <div class="form-check form-check-inline">
+                            <input disabled checked="@question.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                            <label class="form-check-label" for="true">True</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input disabled checked="@(!question.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                            <label class="form-check-label" for="false">False</label>
+                        </div>
+                    </div>
+                    break;
+
+                case "Essay":
+                    <div class="form-group">
+                        <textarea disabled class="form-control" rows="7">@question.Answer.StringAnswer</textarea>
+                    </div>
+                    break;
+
+                case "Submit File":
+                    <ViewFileInfo FilePath="@question.Answer.StringAnswer" />
+                    break;
+            }
+        </div>
+    }
+</section>
+
+<NavLink href="/TestResults" class="btn btn-secondary">Back</NavLink>
 
 @code {
+    [Parameter]
+    public string Id { get; set; }
 
+    public QuestionSet QuestionSet { get; set; }
+    public int CorrectAnswers { get; set; } = 0;
+
+    protected override async Task<Task> OnInitializedAsync()
+    {
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = UserManager.GetUserId(auth.User);
+
+        QuestionSet = Context.QuestionSets
+            .Include(QuestionSet => QuestionSet.Questions
+                .Where(Question => Question.Answer.UserId == userId))
+            .Single(QuestionSet => QuestionSet.Id.ToString() == Id);
+
+        return base.OnInitializedAsync();
+    }
 }

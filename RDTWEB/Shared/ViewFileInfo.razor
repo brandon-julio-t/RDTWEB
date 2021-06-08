@@ -1,0 +1,44 @@
+﻿@using System.IO
+
+@using Microsoft.AspNetCore.Hosting 
+
+@inject IWebHostEnvironment Env
+
+@if (!string.IsNullOrWhiteSpace(FilePath))
+{
+    var fileInfo = GetFileInfo(FilePath);
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <tbody>
+                <tr>
+                    <th>Name</th>
+                    <td>@fileInfo.Name</td>
+                </tr>
+                <tr>
+                    <th>Size</th>
+                    <td>@fileInfo.Length.ToString("n") Bytes</td>
+                </tr>
+                <tr>
+                    <th>Last Modified At</th>
+                    <td>@fileInfo.LastWriteTime</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <small>No file uploaded yet.</small>
+}
+
+@code {
+    [Parameter]
+    public string FilePath { get; set; }
+
+    public FileInfo GetFileInfo(string path)
+    {
+        var absolutePath = Path.Combine(Env.ContentRootPath, path);
+        return new FileInfo(absolutePath);
+    }
+}
