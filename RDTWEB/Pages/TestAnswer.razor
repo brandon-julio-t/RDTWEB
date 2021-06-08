@@ -116,23 +116,25 @@
     protected override async Task<Task> OnInitializedAsync()
     {
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = UserManager.GetUserId(state.User);
 
         QuestionSet = Context.QuestionSets
             .Include(QuestionSet => QuestionSet.Questions)
-            .ThenInclude(Question => Question.Answer)
             .Single(QuestionSet => QuestionSet.Id.ToString() == Id);
 
         QuestionSet.Questions.ForEach(Question =>
         {
-            if (Question.Answer != null)
-            {
-                return;
-            }
+            var answer = Context.Answers
+                .Where(Answer => Answer.QuestionId == Question.Id)
+                .Where(Answer => Answer.UserId == userId)
+                .SingleOrDefault();
 
-            Question.Answer = new Answer
+            Question.Answer = answer ?? new Answer { UserId = userId };
+
+            if (Question.Answer.UserId != userId)
             {
-                UserId = UserManager.GetUserId(state.User)
-            };
+                Question.Answer = new Answer { UserId = userId };
+            }
         });
 
         return base.OnInitializedAsync();
