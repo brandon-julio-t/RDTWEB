@@ -2,7 +2,7 @@
 
 @attribute [Authorize(Roles = "Admin, Participant")]
 
-@using RDTWEB.Data
+@using RDTWEB.Models
 
 @inject ApplicationDbContext Context
 
@@ -51,8 +51,8 @@
     protected override Task OnInitializedAsync()
     {
         QuestionSets = Context.QuestionSets
-            .Where(QuestionSet => QuestionSet.StartAt != null)
-            .Where(QuestionSet => QuestionSet.EndAt != null)
+            .Where(questionSet => questionSet.StartAt != null)
+            .Where(questionSet => questionSet.EndAt != null)
             .ToList();
 
         return base.OnInitializedAsync();

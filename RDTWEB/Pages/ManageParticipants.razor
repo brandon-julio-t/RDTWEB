@@ -2,7 +2,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-@using RDTWEB.Data
+@using RDTWEB.Models
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.Extensions.Logging
 @using Microsoft.Extensions.Configuration
@@ -75,13 +75,11 @@
 
     protected override Task OnInitializedAsync()
     {
-        RefreshUsers();
-        return base.OnInitializedAsync();
-    }
+        Users = Context.AspNetUsers
+            .Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM")
+            .ToList();
 
-    private void RefreshUsers()
-    {
-        Users = Context.AspNetUsers.Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM").ToList();
+        return base.OnInitializedAsync();
     }
 
     public async Task CreateUser()

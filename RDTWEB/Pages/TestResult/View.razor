@@ -6,7 +6,7 @@
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
-@using RDTWEB.Data
+@using RDTWEB.Models
 
 @inject ApplicationDbContext Context
 @inject IWebHostEnvironment Env
@@ -28,11 +28,6 @@
                     @for (var i = 0; i < question.Choices.Count; i++)
                     {
                         int idx = i;
-
-                        if (question.Answer.ChosenIndex == question.CorrectChoiceIndex)
-                        {
-                            CorrectAnswers++;
-                        }
 
                         <div class="form-group form-inline">
                             <input disabled checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox" />
@@ -88,9 +83,12 @@
         var userId = UserManager.GetUserId(auth.User);
 
         QuestionSet = Context.QuestionSets
-            .Include(QuestionSet => QuestionSet.Questions
-                .Where(Question => Question.Answer.UserId == userId))
-            .Single(QuestionSet => QuestionSet.Id.ToString() == Id);
+            .Include(questionSet => questionSet.Questions)
+            .ThenInclude(question => question.Answers)
+            .SingleOrDefault(questionSet => questionSet.Id.ToString() == Id);
+
+        QuestionSet.Questions.ForEach(question =>
+            question.Answer = question.Answers.SingleOrDefault(answer => answer.UserId == userId));
 
         return base.OnInitializedAsync();
     }

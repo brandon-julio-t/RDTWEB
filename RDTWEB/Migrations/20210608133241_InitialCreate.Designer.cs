@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using RDTWEB.Data;
+using RDTWEB.Models;
 
 namespace RDTWEB.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210607110250_InitialCreate")]
+    [Migration("20210608133241_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -221,7 +221,7 @@ namespace RDTWEB.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("RDTWEB.Data.Answer", b =>
+            modelBuilder.Entity("RDTWEB.Models.Answer", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -240,13 +240,12 @@ namespace RDTWEB.Migrations
 
                     b.HasKey("UserId", "QuestionId");
 
-                    b.HasIndex("QuestionId")
-                        .IsUnique();
+                    b.HasIndex("QuestionId");
 
                     b.ToTable("Answers");
                 });
 
-            modelBuilder.Entity("RDTWEB.Data.Question", b =>
+            modelBuilder.Entity("RDTWEB.Models.Question", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -278,7 +277,7 @@ namespace RDTWEB.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("RDTWEB.Data.QuestionSet", b =>
+            modelBuilder.Entity("RDTWEB.Models.QuestionSet", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -350,11 +349,11 @@ namespace RDTWEB.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RDTWEB.Data.Answer", b =>
+            modelBuilder.Entity("RDTWEB.Models.Answer", b =>
                 {
-                    b.HasOne("RDTWEB.Data.Question", "Question")
-                        .WithOne("Answer")
-                        .HasForeignKey("RDTWEB.Data.Answer", "QuestionId")
+                    b.HasOne("RDTWEB.Models.Question", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -369,9 +368,9 @@ namespace RDTWEB.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RDTWEB.Data.Question", b =>
+            modelBuilder.Entity("RDTWEB.Models.Question", b =>
                 {
-                    b.HasOne("RDTWEB.Data.QuestionSet", "QuestionSet")
+                    b.HasOne("RDTWEB.Models.QuestionSet", "QuestionSet")
                         .WithMany("Questions")
                         .HasForeignKey("QuestionSetId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -380,12 +379,12 @@ namespace RDTWEB.Migrations
                     b.Navigation("QuestionSet");
                 });
 
-            modelBuilder.Entity("RDTWEB.Data.Question", b =>
+            modelBuilder.Entity("RDTWEB.Models.Question", b =>
                 {
-                    b.Navigation("Answer");
+                    b.Navigation("Answers");
                 });
 
-            modelBuilder.Entity("RDTWEB.Data.QuestionSet", b =>
+            modelBuilder.Entity("RDTWEB.Models.QuestionSet", b =>
                 {
                     b.Navigation("Questions");
                 });

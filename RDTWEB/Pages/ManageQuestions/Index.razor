@@ -2,7 +2,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-@using RDTWEB.Data
+@using RDTWEB.Models
 @using RDTWEB.ViewModels
 @using Microsoft.EntityFrameworkCore
 @using System.Linq
@@ -55,8 +55,8 @@
     private void RefreshQuestionSets()
     {
         QuestionSetViewModels = Context.QuestionSets
-            .Include(QuestionSet => QuestionSet.Questions)
-            .Select(QuestionSet => new QuestionSetViewModel { QuestionSet = QuestionSet })
+            .Include(questionSet => questionSet.Questions)
+            .Select(questionSet => new QuestionSetViewModel { QuestionSet = questionSet })
             .ToList();
     }
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RDTWEB.Data;
+using RDTWEB.Models;
 
 [assembly: HostingStartup(typeof(RDTWEB.Areas.Identity.IdentityHostingStartup))]
 namespace RDTWEB.Areas.Identity

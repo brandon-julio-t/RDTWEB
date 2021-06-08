@@ -2,7 +2,8 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-@using RDTWEB.Data
+@using RDTWEB.Models
+@using RDTWEB.ViewModels
 
 @inject ApplicationDbContext Context
 
@@ -55,29 +56,19 @@
 @code {
     public List<QuestionSetViewModel> QuestionSetViewModels = new();
 
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        RefreshQuestionSets();
-    }
-
-    private void RefreshQuestionSets()
+    protected override Task OnInitializedAsync()
     {
         QuestionSetViewModels = Context.QuestionSets
-            .Select(QuestionSet => new QuestionSetViewModel { QuestionSet = QuestionSet })
+            .Select(questionSet => new QuestionSetViewModel { QuestionSet = questionSet })
             .ToList();
+
+        return base.OnInitializedAsync();
     }
 
     public void UpdateQuestionSetSchedule(QuestionSetViewModel vm)
     {
         vm.IsEditing = false;
         Context.Update(vm.QuestionSet);
-        Context.SaveChanges();
-    }
-
-    public class QuestionSetViewModel
-    {
-        public QuestionSet QuestionSet { get; set; }
-        public bool IsEditing { get; set; } = false;
+        Context.SaveChangesAsync();
     }
 }

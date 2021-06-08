@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using RDTWEB.Data;
+using RDTWEB.Models;
 
 namespace RDTWEB.ViewModels
 {

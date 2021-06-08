@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RDTWEB.Data
+namespace RDTWEB.Models
 {
     public class Question
     {
@@ -15,7 +16,10 @@ namespace RDTWEB.Data
         public int CorrectChoiceIndex { get; set; } = -1;
         public int QuestionSetId { get; set; }
         public virtual QuestionSet QuestionSet { get; set; }
-        public virtual Answer Answer { get; set; } = null;
+        public virtual List<Answer> Answers { get; set; }
+
+        [NotMapped]
+        public Answer Answer { get; set; }
 
         public Question()
         {

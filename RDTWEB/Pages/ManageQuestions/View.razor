@@ -2,7 +2,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-@using RDTWEB.Data
+@using RDTWEB.Models
 
 @inject ApplicationDbContext Context
 
@@ -58,7 +58,7 @@ else
 
     protected override Task OnInitializedAsync()
     {
-        QuestionSet = Context.QuestionSets.Single(QuestionSet => QuestionSet.Id.ToString() == Id);
+        QuestionSet = Context.QuestionSets.Single(questionSet => questionSet.Id.ToString() == Id);
         return base.OnInitializedAsync();
     }
 

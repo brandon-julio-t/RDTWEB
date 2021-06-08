@@ -7,7 +7,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Logging
-@using RDTWEB.Data
+@using RDTWEB.Models
 
 @inject ApplicationDbContext Context
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -119,48 +119,38 @@
         var userId = UserManager.GetUserId(state.User);
 
         QuestionSet = Context.QuestionSets
-            .Include(QuestionSet => QuestionSet.Questions)
-            .Single(QuestionSet => QuestionSet.Id.ToString() == Id);
+            .Include(questionSet => questionSet.Questions)
+            .ThenInclude(question => question.Answers.Where(answer => answer.UserId == userId))
+            .Single(questionSet => questionSet.Id.ToString() == Id);
 
-        QuestionSet.Questions.ForEach(Question =>
-        {
-            var answer = Context.Answers
-                .Where(Answer => Answer.QuestionId == Question.Id)
-                .Where(Answer => Answer.UserId == userId)
-                .SingleOrDefault();
-
-            Question.Answer = answer ?? new Answer { UserId = userId };
-
-            if (Question.Answer.UserId != userId)
-            {
-                Question.Answer = new Answer { UserId = userId };
-            }
-        });
+        QuestionSet.Questions.ForEach(question =>
+                question.Answer = question.Answers.SingleOrDefault(answer => answer.UserId == userId)
+                    ?? new Answer { UserId = userId, QuestionId = question.Id });
 
         return base.OnInitializedAsync();
     }
 
     public async Task OnSave()
     {
-        await Task.WhenAll(QuestionSet.Questions.Select(async Question =>
+        await Task.WhenAll(QuestionSet.Questions.Select(async question =>
         {
-            if (Question.Type != "Submit File" || Question.Answer.BrowserFile == null)
+            if (question.Type != "Submit File" || question.Answer.BrowserFile == null)
             {
                 return;
             }
 
-            var previousPath = Question.Answer.StringAnswer;
+            var previousPath = question.Answer.StringAnswer;
 
-            var name = Question.Answer.BrowserFile.Name;
+            var name = question.Answer.BrowserFile.Name;
             var extension = name.Substring(name.LastIndexOf("."));
 
             var path = Path.Combine("Storage", "Answers", Path.GetRandomFileName() + extension);
             using var file = File.Create(path);
             file.Seek(0, SeekOrigin.Begin);
-            await Question.Answer.BrowserFile.OpenReadStream(maxAllowedSize: 512000000).CopyToAsync(file);
+            await question.Answer.BrowserFile.OpenReadStream(maxAllowedSize: 512000000).CopyToAsync(file);
 
-            Question.Answer.StringAnswer = path;
-            Question.Answer.BrowserFile = null;
+            question.Answer.StringAnswer = path;
+            question.Answer.BrowserFile = null;
 
             if (!string.IsNullOrWhiteSpace(previousPath))
             {
@@ -169,8 +159,19 @@
             }
         }));
 
-        Context.Update(QuestionSet);
-        Context.SaveChanges();
+        var answers = QuestionSet.Questions.Select(Question => Question.Answer);
+
+        try
+        {
+            Context.AddRange(answers);
+            Context.SaveChanges();
+        }
+        catch (DbUpdateException)
+        {
+            // Entity exists, update it instead.
+            Context.UpdateRange(answers);
+            Context.SaveChanges();
+        }
 
         AreAnswersSaved = true;
     }

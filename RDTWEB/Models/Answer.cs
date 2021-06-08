@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 
-namespace RDTWEB.Data
+namespace RDTWEB.Models
 {
     public class Answer
     {
@@ -17,6 +17,7 @@ namespace RDTWEB.Data
         public virtual IdentityUser User { get; set; }
         public int QuestionId { get; set; }
         public virtual Question Question { get; set; }
+        
         [NotMapped]
         public IBrowserFile BrowserFile { get; set; } = null;
     }

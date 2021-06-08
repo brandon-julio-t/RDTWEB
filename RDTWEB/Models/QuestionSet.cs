@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RDTWEB.Data
+namespace RDTWEB.Models
 {
     public class QuestionSet
     {
