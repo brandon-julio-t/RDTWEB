@@ -2,6 +2,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+@using Microsoft.EntityFrameworkCore
 @using RDTWEB.Models
 
 @inject ApplicationDbContext Context
@@ -44,7 +45,7 @@ else
 else
 {
     <button @onclick="() => IsEditing = true" class="btn btn-primary">Edit</button>
-    <NavLink href="/ManageQuestions" class="btn btn-secondary">Back</NavLink>
+    <NavLink href="ManageQuestions" class="btn btn-secondary">Back</NavLink>
 }
 
 
@@ -58,7 +59,11 @@ else
 
     protected override Task OnInitializedAsync()
     {
-        QuestionSet = Context.QuestionSets.Single(questionSet => questionSet.Id.ToString() == Id);
+        QuestionSet = Context.QuestionSets
+            .Include(questionSet => questionSet.Questions)
+            .AsSplitQuery()
+            .Single(questionSet => questionSet.Id.ToString() == Id);
+    
         return base.OnInitializedAsync();
     }
 

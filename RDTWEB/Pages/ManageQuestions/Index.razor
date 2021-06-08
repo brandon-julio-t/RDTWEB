@@ -55,7 +55,6 @@
     private void RefreshQuestionSets()
     {
         QuestionSetViewModels = Context.QuestionSets
-            .Include(questionSet => questionSet.Questions)
             .Select(questionSet => new QuestionSetViewModel { QuestionSet = questionSet })
             .ToList();
     }

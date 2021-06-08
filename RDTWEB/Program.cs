@@ -23,11 +23,9 @@ namespace RDTWEB
 
             try
             {
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                context.Database.Migrate();
+                services.GetRequiredService<ApplicationDbContext>().Database.Migrate();
 
                 var config = host.Services.GetRequiredService<IConfiguration>();
-
                 var testUserPw = config["DefaultPassword"];
 
                 SeedData.Initialize(services, testUserPw).Wait();

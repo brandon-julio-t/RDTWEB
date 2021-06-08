@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RDTWEB.Areas.Identity;
 using RDTWEB.Models;
 
@@ -21,10 +22,12 @@ namespace RDTWEB
     public class Startup
     {
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Env { get; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Env = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -32,7 +35,8 @@ namespace RDTWEB
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseLazyLoadingProxies()
                     .UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
-            );
+                    .UseLoggerFactory(LoggerFactory.Create(configure =>
+                        configure.AddConsole().AddFilter("", Env.IsDevelopment() ? LogLevel.Information : LogLevel.Warning))));
 
             services.AddDefaultIdentity<IdentityUser>()
                 .AddRoles<IdentityRole>()

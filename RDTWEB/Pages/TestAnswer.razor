@@ -121,6 +121,7 @@
         QuestionSet = Context.QuestionSets
             .Include(questionSet => questionSet.Questions)
             .ThenInclude(question => question.Answers.Where(answer => answer.UserId == userId))
+            .AsSplitQuery()
             .Single(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions.ForEach(question =>
