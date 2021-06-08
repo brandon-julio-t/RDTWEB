@@ -15,6 +15,25 @@
 
 <h3>@QuestionSet.Title</h3>
 
+<section class="table-responsive">
+    <table class="table table-hover">
+        <tbody>
+            <tr>
+                <th>Correct Answers</th>
+                <td>@CorrectAnswers</td>
+            </tr>
+            <tr>
+                <th>Opinionated Answers</th>
+                <td>@OpinionatedAnswers</td>
+            </tr>
+            <tr>
+                <th>Total Questions</th>
+                <td>@QuestionSet.Questions.Count</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
 <section>
     @foreach (var question in QuestionSet.Questions)
     {
@@ -37,11 +56,6 @@
                     break;
 
                 case "Boolean (true or false)":
-                    if (question.BooleanAnswer == question.Answer.BooleanAnswer)
-                    {
-                        CorrectAnswers++;
-                    }
-
                     <div class="form-group">
                         <div class="form-check form-check-inline">
                             <input disabled checked="@question.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
@@ -76,6 +90,7 @@
 
     public QuestionSet QuestionSet { get; set; }
     public int CorrectAnswers { get; set; } = 0;
+    public int OpinionatedAnswers { get; set; } = 0;
 
     protected override async Task<Task> OnInitializedAsync()
     {
@@ -88,7 +103,26 @@
             .SingleOrDefault(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions.ForEach(question =>
-            question.Answer = question.Answers.SingleOrDefault(answer => answer.UserId == userId));
+        {
+            question.Answer = question.Answers.SingleOrDefault(answer => answer.UserId == userId);
+
+            switch (question.Type)
+            {
+                case "Multiple Choice":
+                case "Multiple Answer List":
+                    CorrectAnswers += question.CorrectChoiceIndex == question.Answer.ChosenIndex ? 1 : 0;
+                    break;
+
+                case "Boolean (true or false)":
+                    CorrectAnswers += question.BooleanAnswer == question.Answer.BooleanAnswer ? 1 : 0;
+                    break;
+
+                case "Essay":
+                case "Submit File":
+                    OpinionatedAnswers++;
+                    break;
+            }
+        });
 
         return base.OnInitializedAsync();
     }

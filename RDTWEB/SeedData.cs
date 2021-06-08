@@ -63,7 +63,6 @@ namespace RDTWEB
             string role)
         {
             var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
-
             if (roleManager == null)
             {
                 throw new Exception("roleManager null");
@@ -75,9 +74,7 @@ namespace RDTWEB
             }
 
             var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
-
             var user = await userManager.FindByIdAsync(uid);
-
             if (user == null)
             {
                 throw new Exception("The testUserPw password was probably not strong enough!");
