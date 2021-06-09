@@ -1,7 +1,7 @@
 ﻿<p>Server Time: @CurrentTime</p>
 
 @code {
-    public DateTime CurrentTime { get; set; }
+    private DateTime CurrentTime { get; set; }
 
     protected override void OnInitialized()
     {
@@ -9,11 +9,18 @@
 
         InvokeAsync(async () =>
         {
-            while (true)
+            try
             {
-                CurrentTime = DateTime.Now;
-                StateHasChanged();
-                await Task.Delay(1000);
+                while (true)
+                {
+                    CurrentTime = DateTime.Now;
+                    StateHasChanged();
+                    await Task.Delay(1000);
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
             }
         });
     }

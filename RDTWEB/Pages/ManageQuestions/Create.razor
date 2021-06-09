@@ -1,24 +1,24 @@
 ﻿@page "/ManageQuestions/Create"
 
-@attribute [Authorize(Roles = "Admin")]
-
 @using RDTWEB.Models
 
-@inject ApplicationDbContext context
+@attribute [Authorize(Roles = "Admin")]
+
+@inject ApplicationDbContext _context
 
 <h3>Manage Questions</h3>
 
 <section>
     <div class="form-group">
-        <input @bind-value="@QuestionSet.Title" type="text" class="form-control" placeholder="Question Set Title" />
+        <input @bind-value="@QuestionSet.Title" type="text" class="form-control" placeholder="Question Set Title"/>
     </div>
 
-    <hr />
+    <hr/>
 
     @for (var i = 0; i < Questions.Count; i++)
     {
         var question = Questions[i];
-        <ViewQuestion Question="question" Number="i + 1" IsEditing="true" IsNew="true" />
+        <ViewQuestion Question="question" Number="i + 1" IsEditing="true" IsNew="true"/>
     }
 </section>
 
@@ -37,25 +37,26 @@
 <NavLink href="/ManageQuestions" class="btn btn-danger">Cancel</NavLink>
 
 @code {
-    private List<Question> Questions = new();
+    private List<Question> Questions { get; set; } = new();
 
-    public QuestionSet QuestionSet = new();
-    public bool IsSuccess = false;
+    private QuestionSet QuestionSet { get; set; } = new();
+    private bool IsSuccess { get; set; }
 
-    public void AddNewQuestion()
+    private void AddNewQuestion()
     {
         Questions.Add(new Question());
     }
 
-    public void SaveQuestionSet()
+    private void SaveQuestionSet()
     {
         QuestionSet.Questions = Questions;
-        context.Add(QuestionSet);
-        context.SaveChangesAsync();
+        _context.Add(QuestionSet);
+        _context.SaveChangesAsync();
 
-        QuestionSet = new();
-        Questions = new();
+        QuestionSet = new QuestionSet();
+        Questions = new List<Question>();
 
         IsSuccess = true;
     }
+
 }

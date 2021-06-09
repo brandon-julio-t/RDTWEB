@@ -1,35 +1,34 @@
 ﻿@page "/TestResults/{id?}"
 
-@attribute [Authorize(Roles = "Admin, Participant")]
-
-@using System.IO
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.EntityFrameworkCore
 @using RDTWEB.Models
 
-@inject ApplicationDbContext Context
-@inject IWebHostEnvironment Env
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject UserManager<IdentityUser> UserManager
+@attribute [Authorize(Roles = "Admin, Participant")]
+
+@inject ApplicationDbContext _context
+@inject IWebHostEnvironment _env
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject UserManager<IdentityUser> _userManager
 
 <h3>@QuestionSet.Title</h3>
 
 <section class="table-responsive">
-    <table class="table table-hover">
+    <table class="table table-bordered table-hover">
         <tbody>
-            <tr>
-                <th>Correct Answers</th>
-                <td>@CorrectAnswers</td>
-            </tr>
-            <tr>
-                <th>Opinionated Answers</th>
-                <td>@OpinionatedAnswers</td>
-            </tr>
-            <tr>
-                <th>Total Questions</th>
-                <td>@QuestionSet.Questions.Count</td>
-            </tr>
+        <tr>
+            <th>Correct Answers</th>
+            <td>@CorrectAnswers</td>
+        </tr>
+        <tr>
+            <th>Opinionated Answers</th>
+            <td>@OpinionatedAnswers</td>
+        </tr>
+        <tr>
+            <th>Total Questions</th>
+            <td>@QuestionSet.Questions.Count</td>
+        </tr>
         </tbody>
     </table>
 </section>
@@ -46,11 +45,11 @@
                 case "Multiple Answer List":
                     @for (var i = 0; i < question.Choices.Count; i++)
                     {
-                        int idx = i;
+                        var idx = i;
 
                         <div class="form-group form-inline">
-                            <input disabled checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox" />
-                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)" />
+                            <input disabled checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
                         </div>
                     }
                     break;
@@ -75,37 +74,38 @@
                     break;
 
                 case "Submit File":
-                    <ViewFileInfo FilePath="@question.Answer.StringAnswer" />
+                    <ViewFileInfo FilePath="@question.Answer.StringAnswer"/>
                     break;
             }
         </div>
     }
 </section>
 
-<NavLink href="/TestResults" class="btn btn-secondary">Back</NavLink>
+<NavLink href="TestResults" class="btn btn-secondary">Back</NavLink>
 
 @code {
+
     [Parameter]
     public string Id { get; set; }
 
-    public QuestionSet QuestionSet { get; set; }
-    public int CorrectAnswers { get; set; } = 0;
-    public int OpinionatedAnswers { get; set; } = 0;
+    private QuestionSet QuestionSet { get; set; }
+    private int CorrectAnswers { get; set; }
+    private int OpinionatedAnswers { get; set; }
 
     protected override async Task<Task> OnInitializedAsync()
     {
-        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = UserManager.GetUserId(auth.User);
+        var auth = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = _userManager.GetUserId(auth.User);
 
-        QuestionSet = Context.QuestionSets
+        QuestionSet = _context.QuestionSets
             .Include(questionSet => questionSet.Questions)
             .ThenInclude(question => question.Answers)
-            .AsSplitQuery() 
-            .SingleOrDefault(questionSet => questionSet.Id.ToString() == Id);
+            .AsSplitQuery()
+            .Single(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions.ForEach(question =>
         {
-            question.Answer = question.Answers.SingleOrDefault(answer => answer.UserId == userId);
+            question.Answer = question.Answers.Single(answer => answer.UserId == userId);
 
             switch (question.Type)
             {
@@ -127,4 +127,5 @@
 
         return base.OnInitializedAsync();
     }
+
 }

@@ -1,16 +1,16 @@
 ﻿@page "/ManageQuestions/{id?}"
 
-@attribute [Authorize(Roles = "Admin")]
-
 @using Microsoft.EntityFrameworkCore
 @using RDTWEB.Models
 
-@inject ApplicationDbContext Context
+@attribute [Authorize(Roles = "Admin")]
+
+@inject ApplicationDbContext _context
 
 @if (IsEditing)
 {
     <div class="form-group">
-        <input @bind-value="@QuestionSet.Title" class="form-control" />
+        <input @bind-value="@QuestionSet.Title" class="form-control"/>
     </div>
 }
 else
@@ -22,7 +22,7 @@ else
     @for (var i = 0; i < QuestionSet.Questions.Count; i++)
     {
         var question = QuestionSet.Questions[i];
-        <ViewQuestion Question="@question" Number="i + 1" OnDelete="q => OnQuestionDeleted((Question) q)" />
+        <ViewQuestion Question="@question" Number="i + 1" OnDelete="OnQuestionDeleted"/>
     }
 </section>
 
@@ -50,38 +50,40 @@ else
 
 
 @code {
+
     [Parameter]
     public string Id { get; set; }
 
-    public QuestionSet QuestionSet { get; set; }
-    public bool IsEditing { get; set; } = false;
-    public bool IsUpdateSuccess { get; set; } = false;
+    private QuestionSet QuestionSet { get; set; }
+    private bool IsEditing { get; set; }
+    private bool IsUpdateSuccess { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        QuestionSet = Context.QuestionSets
+        QuestionSet = _context.QuestionSets
             .Include(questionSet => questionSet.Questions)
             .AsSplitQuery()
             .Single(questionSet => questionSet.Id.ToString() == Id);
-    
+
         return base.OnInitializedAsync();
     }
 
-    public void AddQuestion()
+    private void AddQuestion()
     {
         QuestionSet.Questions.Add(new Question());
     }
 
-    public void UpdateQuestionSet()
+    private void UpdateQuestionSet()
     {
         IsUpdateSuccess = true;
         IsEditing = false;
-        Context.Update(QuestionSet);
-        Context.SaveChangesAsync();
+        _context.Update(QuestionSet);
+        _context.SaveChangesAsync();
     }
 
-    public void OnQuestionDeleted(Question question)
+    private void OnQuestionDeleted(Question question)
     {
         QuestionSet.Questions.Remove(question);
     }
+
 }

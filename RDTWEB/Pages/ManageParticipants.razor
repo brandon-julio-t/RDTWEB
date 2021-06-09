@@ -1,14 +1,14 @@
 ﻿@page "/ManageParticipants"
 
+@using Microsoft.Extensions.Configuration
+@using Microsoft.AspNetCore.Identity
+@using RDTWEB.Models
+
 @attribute [Authorize(Roles = "Admin")]
 
-@using RDTWEB.Models
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.Extensions.Configuration
-
-@inject ApplicationDbContext Context
-@inject UserManager<IdentityUser> UserManager
-@inject IConfiguration Config
+@inject ApplicationDbContext _context
+@inject UserManager<IdentityUser> _userManager
+@inject IConfiguration _config
 
 <h3>Manage Participants</h3>
 
@@ -17,32 +17,32 @@
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var User in Users)
-            {
-                <tr>
-                    <td class="align-middle">@User.Id</td>
-                    <td class="align-middle">@User.UserName</td>
-                    <td class="align-middle">@User.Email</td>
-                    <td class="align-middle">
-                        <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(User)">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            }
+        @foreach (var user in Users)
+        {
+            <tr>
+                <td class="align-middle">@user.Id</td>
+                <td class="align-middle">@user.UserName</td>
+                <td class="align-middle">@user.Email</td>
+                <td class="align-middle">
+                    <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(user)">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>
 
-<hr />
+<hr/>
 
 <h4>Create Participants</h4>
 
@@ -66,22 +66,22 @@
 </EditForm>
 
 @code {
-    private List<IdentityUser> Users = new();
+    private List<IdentityUser> Users { get; set; } = new();
 
-    public CreateUserForm FormModel = new();
-    public Boolean IsSuccess = false;
-    public string SuccessMessage = "";
+    private CreateUserForm FormModel { get; } = new();
+    private bool IsSuccess { get; set; }
+    private string SuccessMessage { get; set; } = "";
 
     protected override Task OnInitializedAsync()
     {
-        Users = Context.AspNetUsers
+        Users = _context.AspNetUsers
             .Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM")
             .ToList();
 
         return base.OnInitializedAsync();
     }
 
-    public async Task CreateUser()
+    private async Task CreateUser()
     {
         var user = new IdentityUser
         {
@@ -96,13 +96,13 @@
 
         Users.Add(user);
 
-        await UserManager.CreateAsync(user, Config["DefaultPassword"]);
-        await UserManager.AddToRoleAsync(user, "Participant");
+        await _userManager.CreateAsync(user, _config["DefaultPassword"]);
+        await _userManager.AddToRoleAsync(user, "Participant");
     }
 
-    public void DeleteUser(IdentityUser user)
+    private void DeleteUser(IdentityUser user)
     {
-        UserManager.DeleteAsync(user);
+        _userManager.DeleteAsync(user);
 
         IsSuccess = true;
         SuccessMessage = "Delete User Success.";
@@ -114,4 +114,5 @@
     {
         public string Username { get; set; }
     }
+
 }

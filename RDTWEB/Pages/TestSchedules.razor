@@ -1,56 +1,56 @@
 ﻿@page "/TestSchedules"
 
-@attribute [Authorize(Roles = "Admin, Participant")]
-
 @using RDTWEB.Models
 
-@inject ApplicationDbContext Context
+@attribute [Authorize(Roles = "Admin, Participant")]
+
+@inject ApplicationDbContext _context
 
 <h3>Test Schedules</h3>
 
-<ServerTime />
+<ServerTime/>
 
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-            <tr>
-                <th>Title</th>
-                <th>Start At</th>
-                <th>End At</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>Title</th>
+            <th>Start At</th>
+            <th>End At</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var set in QuestionSets)
-            {
-                <tr class="@GetTrClassByStatus(set)">
-                    <td class="align-middle">@set.Title</td>
-                    <td class="align-middle">@set.StartAt?.ToString("U")</td>
-                    <td class="align-middle">@set.EndAt?.ToString("U")</td>
-                    <td class="align-middle">@set.Status</td>
-                    <td class="align-middle">
-                        @if (set.Status == "Ongoing")
-                        {
-                            <NavLink href="@($"/TestAnswer/{set.Id}")" class="btn btn-primary">Answer</NavLink>
-                        }
-                        else
-                        {
-                            <span>-</span>
-                        }
-                    </td>
-                </tr>
-            }
+        @foreach (var set in QuestionSets)
+        {
+            <tr class="@GetTrClassByStatus(set) ">
+                <td class="align-middle">@set.Title</td>
+                <td class="align-middle">@set.StartAt?.ToString("U")</td>
+                <td class="align-middle">@set.EndAt?.ToString("U")</td>
+                <td class="align-middle">@set.Status</td>
+                <td class="align-middle">
+                    @if (set.Status == "Ongoing")
+                    {
+                        <NavLink href="@($"/TestAnswer/{set.Id}")" class="btn btn-primary">Answer</NavLink>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>
 
 @code {
-    public List<QuestionSet> QuestionSets { get; set; }
+    private List<QuestionSet> QuestionSets { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        QuestionSets = Context.QuestionSets
+        QuestionSets = _context.QuestionSets
             .Where(questionSet => questionSet.StartAt != null)
             .Where(questionSet => questionSet.EndAt != null)
             .ToList();
@@ -58,15 +58,9 @@
         return base.OnInitializedAsync();
     }
 
-    public string GetTrClassByStatus(QuestionSet questionSet)
+    private static string GetTrClassByStatus(QuestionSet questionSet)
     {
-        switch (questionSet.Status)
-        {
-            case "Ongoing": return "bg-success text-white";
-            case "Is Over":
-            case "Not Started":
-            default:
-                return "";
-        }
+        return questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
     }
+
 }

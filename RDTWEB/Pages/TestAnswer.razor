@@ -1,37 +1,35 @@
 ﻿@page "/TestAnswer/{id?}"
 
-@attribute [Authorize(Roles = "Admin, Participant")]
-
-@using System.IO
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.EntityFrameworkCore
-@using Microsoft.Extensions.Logging
 @using RDTWEB.Models
+@using System.IO
 
-@inject ApplicationDbContext Context
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject UserManager<IdentityUser> UserManager
-@inject IWebHostEnvironment Env
-@inject ILogger<TestAnswer> Logger
+@attribute [Authorize(Roles = "Admin, Participant")]
+
+@inject ApplicationDbContext _context
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject UserManager<IdentityUser> _userManager
+@inject IWebHostEnvironment _env
 
 <h3>Information</h3>
 
 <div class="table-responsive">
-    <table class="table table-hover">
+    <table class="table table-bordered table-hover">
         <tbody>
-            <tr>
-                <th>Title</th>
-                <td>@QuestionSet.Title</td>
-            </tr>
-            <tr>
-                <th>Start At</th>
-                <td>@QuestionSet.StartAt</td>
-            </tr>
-            <tr>
-                <th>End At</th>
-                <td>@QuestionSet.EndAt</td>
-            </tr>
+        <tr>
+            <th>Title</th>
+            <td>@QuestionSet.Title</td>
+        </tr>
+        <tr>
+            <th>Start At</th>
+            <td>@QuestionSet.StartAt</td>
+        </tr>
+        <tr>
+            <th>End At</th>
+            <td>@QuestionSet.EndAt</td>
+        </tr>
         </tbody>
     </table>
 </div>
@@ -56,8 +54,8 @@
                         var idx = j;
 
                         <div class="form-group form-inline">
-                            <input @onchange="() => question.Answer.ChosenIndex = idx" checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox" />
-                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)" />
+                            <input @onchange="() => question.Answer.ChosenIndex = idx" checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
                         </div>
                     }
                     break;
@@ -83,10 +81,10 @@
 
                 case "Submit File":
                     <div class="form-group">
-                        <InputFile OnChange="e => question.Answer.BrowserFile = e.File" class="form-control-file" />
+                        <InputFile OnChange="e => question.Answer.BrowserFile = e.File" class="form-control-file"/>
                     </div>
 
-                    <ViewFileInfo FilePath="@question.Answer.StringAnswer" />
+                    <ViewFileInfo FilePath="@question.Answer.StringAnswer"/>
                     break;
             }
         </div>
@@ -107,31 +105,34 @@
 <NavLink href="/TestSchedules" class="btn btn-secondary">Back</NavLink>
 
 @code {
+
     [Parameter]
     public string Id { get; set; }
 
-    public QuestionSet QuestionSet { get; set; }
-    public bool AreAnswersSaved { get; set; } = false;
+    private QuestionSet QuestionSet { get; set; }
+    private bool AreAnswersSaved { get; set; }
 
     protected override async Task<Task> OnInitializedAsync()
     {
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = UserManager.GetUserId(state.User);
+        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = _userManager.GetUserId(state.User);
 
-        QuestionSet = Context.QuestionSets
+        QuestionSet = _context.QuestionSets
             .Include(questionSet => questionSet.Questions)
             .ThenInclude(question => question.Answers.Where(answer => answer.UserId == userId))
             .AsSplitQuery()
             .Single(questionSet => questionSet.Id.ToString() == Id);
 
-        QuestionSet.Questions.ForEach(question =>
-                question.Answer = question.Answers.SingleOrDefault(answer => answer.UserId == userId)
-                    ?? new Answer { UserId = userId, QuestionId = question.Id });
+        QuestionSet.Questions
+            .ForEach(question =>
+                question.Answer = question.Answers
+                    .SingleOrDefault(answer => answer.UserId == userId)
+                                  ?? new Answer {UserId = userId, QuestionId = question.Id});
 
         return base.OnInitializedAsync();
     }
 
-    public async Task OnSave()
+    private async Task OnSave()
     {
         await Task.WhenAll(QuestionSet.Questions.Select(async question =>
         {
@@ -143,37 +144,38 @@
             var previousPath = question.Answer.StringAnswer;
 
             var name = question.Answer.BrowserFile.Name;
-            var extension = name.Substring(name.LastIndexOf("."));
+            var extension = name[name.LastIndexOf(".", StringComparison.Ordinal)..];
 
             var path = Path.Combine("Storage", "Answers", Path.GetRandomFileName() + extension);
-            using var file = File.Create(path);
+            await using var file = File.Create(path);
             file.Seek(0, SeekOrigin.Begin);
-            await question.Answer.BrowserFile.OpenReadStream(maxAllowedSize: 512000000).CopyToAsync(file);
+            await question.Answer.BrowserFile.OpenReadStream(512000000).CopyToAsync(file);
 
             question.Answer.StringAnswer = path;
             question.Answer.BrowserFile = null;
 
             if (!string.IsNullOrWhiteSpace(previousPath))
             {
-                var absolutePath = Path.Combine(Env.ContentRootPath, previousPath);
+                var absolutePath = Path.Combine(_env.ContentRootPath, previousPath);
                 File.Delete(absolutePath);
             }
         }));
 
-        var answers = QuestionSet.Questions.Select(Question => Question.Answer);
+        var answers = QuestionSet.Questions.Select(question => question.Answer).ToList();
 
         try
         {
-            Context.AddRange(answers);
-            Context.SaveChanges();
+            await _context.AddRangeAsync(answers);
+            await _context.SaveChangesAsync();
         }
         catch (DbUpdateException)
         {
-            // Entity exists, update it instead.
-            Context.UpdateRange(answers);
-            Context.SaveChanges();
+    // Entity exists, update it instead.
+            _context.UpdateRange(answers);
+            await _context.SaveChangesAsync();
         }
 
         AreAnswersSaved = true;
     }
+
 }

@@ -1,8 +1,7 @@
-﻿@using System.IO
+﻿@using Microsoft.AspNetCore.Hosting
+@using System.IO
 
-@using Microsoft.AspNetCore.Hosting
-
-@inject IWebHostEnvironment Env
+@inject IWebHostEnvironment _env
 
 @if (!string.IsNullOrWhiteSpace(FilePath))
 {
@@ -11,23 +10,23 @@
     <div class="table-responsive">
         <table class="table table-hover">
             <tbody>
-                <tr>
-                    <th>Name</th>
-                    <td>@fileInfo.Name</td>
-                </tr>
-                <tr>
-                    <th>Size</th>
-                    <td>@fileInfo.Length.ToString("n") Bytes</td>
-                </tr>
-                <tr>
-                    <th>Last Modified At</th>
-                    <td>@fileInfo.LastWriteTime</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <a href="@FilePath" target="_blank" class="btn btn-primary">Download</a>
-                    </td>
-                </tr>
+            <tr>
+                <th>Name</th>
+                <td>@fileInfo.Name</td>
+            </tr>
+            <tr>
+                <th>Size</th>
+                <td>@fileInfo.Length.ToString("n") Bytes</td>
+            </tr>
+            <tr>
+                <th>Last Modified At</th>
+                <td>@fileInfo.LastWriteTime</td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <a href="@FilePath" target="_blank" class="btn btn-primary">Download</a>
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -38,12 +37,14 @@ else
 }
 
 @code {
+
     [Parameter]
     public string FilePath { get; set; }
 
-    public FileInfo GetFileInfo(string path)
+    private FileInfo GetFileInfo(string path)
     {
-        var absolutePath = Path.Combine(Env.ContentRootPath, path);
+        var absolutePath = Path.Combine(_env.ContentRootPath, path);
         return new FileInfo(absolutePath);
     }
+
 }
