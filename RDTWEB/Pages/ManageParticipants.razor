@@ -1,83 +1,77 @@
 ﻿@page "/ManageParticipants"
 
 @using Microsoft.Extensions.Configuration
-@using Microsoft.AspNetCore.Identity
-@using RDTWEB.Models
 
 @attribute [Authorize(Roles = "Admin")]
 
-@inject ApplicationDbContext _context
 @inject UserManager<IdentityUser> _userManager
 @inject IConfiguration _config
 
-<h3>Manage Participants</h3>
+<main class="row">
+    <section class="col-7 pr-2">
+        <h3>Participants</h3>
 
-<h4>Participants</h4>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var user in Users)
+                {
+                    <tr>
+                        <td class="align-middle">@user.Id</td>
+                        <td class="align-middle">@user.Email</td>
+                        <td class="align-middle">
+                            <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(user)">Delete</button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var user in Users)
-        {
-            <tr>
-                <td class="align-middle">@user.Id</td>
-                <td class="align-middle">@user.UserName</td>
-                <td class="align-middle">@user.Email</td>
-                <td class="align-middle">
-                    <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(user)">
-                        Delete
+    <section class="col-4 pl-2">
+        <div style="position: sticky; top: 73px;">
+            <h3>Create Participants</h3>
+
+            @if (IsSuccess)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    Create User Success.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="() => IsSuccess = false">
+                        <span aria-hidden="true">&times;</span>
                     </button>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-</div>
+                </div>
+            }
 
-<hr/>
+            <EditForm Model="@FormModel" OnSubmit="@CreateUser">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input @bind-value="FormModel.Username" type="text" class="form-control" id="username" placeholder="Username">
+                </div>
 
-<h4>Create Participants</h4>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </EditForm>
 
-@if (IsSuccess)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @SuccessMessage
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="() => IsSuccess = false">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-}
-
-<EditForm Model="@FormModel" OnSubmit="@CreateUser">
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input @bind-value="FormModel.Username" type="text" class="form-control" id="username" placeholder="Username">
-    </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-</EditForm>
+        </div>
+    </section>
+</main>
 
 @code {
     private List<IdentityUser> Users { get; set; } = new();
 
     private CreateUserForm FormModel { get; } = new();
     private bool IsSuccess { get; set; }
-    private string SuccessMessage { get; set; } = "";
 
-    protected override Task OnInitializedAsync()
+    protected override async Task<Task> OnInitializedAsync()
     {
-        Users = _context.AspNetUsers
-            .Where(user => user.NormalizedUserName != "ADMIN@EMAIL.COM")
-            .ToList();
-
+        Users = (await _userManager.GetUsersInRoleAsync("Participant")).ToList();
         return base.OnInitializedAsync();
     }
 
@@ -92,7 +86,6 @@
 
         FormModel.Username = "";
         IsSuccess = true;
-        SuccessMessage = "Create User Success.";
 
         Users.Add(user);
 
@@ -103,10 +96,6 @@
     private void DeleteUser(IdentityUser user)
     {
         _userManager.DeleteAsync(user);
-
-        IsSuccess = true;
-        SuccessMessage = "Delete User Success.";
-
         Users.Remove(user);
     }
 

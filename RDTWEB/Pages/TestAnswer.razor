@@ -1,10 +1,9 @@
 ﻿@page "/TestAnswer/{id?}"
 
-@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Hosting
-@using Microsoft.AspNetCore.Identity
-@using RDTWEB.Models
 @using System.IO
+@using System.Transactions
+@using Microsoft.Extensions.Logging
 
 @attribute [Authorize(Roles = "Admin, Participant")]
 
@@ -14,6 +13,8 @@
 @inject IWebHostEnvironment _env
 
 <h3>Information</h3>
+
+<ServerTime />
 
 <div class="table-responsive">
     <table class="table table-bordered table-hover">
@@ -132,14 +133,12 @@
         return base.OnInitializedAsync();
     }
 
-    private async Task OnSave()
+    private void OnSave()
     {
-        await Task.WhenAll(QuestionSet.Questions.Select(async question =>
+        QuestionSet.Questions.ForEach(async question =>
         {
             if (question.Type != "Submit File" || question.Answer.BrowserFile == null)
-            {
                 return;
-            }
 
             var previousPath = question.Answer.StringAnswer;
 
@@ -154,25 +153,25 @@
             question.Answer.StringAnswer = path;
             question.Answer.BrowserFile = null;
 
-            if (!string.IsNullOrWhiteSpace(previousPath))
-            {
-                var absolutePath = Path.Combine(_env.ContentRootPath, previousPath);
-                File.Delete(absolutePath);
-            }
-        }));
+            if (string.IsNullOrWhiteSpace(previousPath))
+                return;
+            
+            var absolutePath = Path.Combine(_env.ContentRootPath, previousPath);
+            File.Delete(absolutePath);
+        });
 
         var answers = QuestionSet.Questions.Select(question => question.Answer).ToList();
 
         try
         {
-            await _context.AddRangeAsync(answers);
-            await _context.SaveChangesAsync();
+            _context.AddRange(answers);
+            _context.SaveChanges();
         }
         catch (DbUpdateException)
         {
     // Entity exists, update it instead.
             _context.UpdateRange(answers);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
         AreAnswersSaved = true;

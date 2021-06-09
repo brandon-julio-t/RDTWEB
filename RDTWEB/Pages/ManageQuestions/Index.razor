@@ -1,13 +1,10 @@
 ﻿@page "/ManageQuestions"
-
-@using RDTWEB.Models
-@using RDTWEB.ViewModels
-
 @attribute [Authorize(Roles = "Admin")]
-
 @inject ApplicationDbContext _context
 
 <h3>Manage Questions</h3>
+
+<NavLink href="/ManageQuestions/Create" class="btn btn-primary">Create New Question Set</NavLink>
 
 <div class="table-responsive">
     <table class="table table-hover">
@@ -28,17 +25,17 @@
                 <td class="align-middle">@vm.QuestionSet.Title</td>
                 <td class="align-middle">@(vm.QuestionSet.StartAt?.ToString() ?? "-")</td>
                 <td class="align-middle">@(vm.QuestionSet.EndAt?.ToString() ?? "-")</td>
-                <td class="btn-group" role="group" aria-label="Actions">
-                    <NavLink class="btn btn-secondary" href="@($"/ManageQuestions/{vm.QuestionSet.Id}")">View</NavLink>
-                    <button @onclick="() => OnDelete(vm)" class="btn btn-danger">Delete</button>
+                <td class="align-middle">
+                    <div class="btn-group" role="group" aria-label="Actions">
+                        <NavLink class="btn btn-secondary" href="@($"/ManageQuestions/{vm.QuestionSet.Id}")">View</NavLink>
+                        <button @onclick="() => OnDelete(vm)" class="btn btn-danger">Delete</button>
+                    </div>
                 </td>
             </tr>
         }
         </tbody>
     </table>
 </div>
-
-<NavLink href="/ManageQuestions/Create" class="btn btn-primary">Create New Question Set</NavLink>
 
 @code {
     private List<QuestionSetViewModel> QuestionSetViewModels { get; set; } = new();
@@ -48,7 +45,7 @@
         QuestionSetViewModels = _context.QuestionSets
             .Select(questionSet => new QuestionSetViewModel {QuestionSet = questionSet})
             .ToList();
-        
+
         return base.OnInitializedAsync();
     }
 

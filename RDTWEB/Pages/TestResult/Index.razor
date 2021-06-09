@@ -1,9 +1,4 @@
 ﻿@page "/TestResults"
-
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.EntityFrameworkCore
-@using RDTWEB.Models
-
 @attribute [Authorize(Roles = "Admin, Participant")]
 
 @inject ApplicationDbContext _context
@@ -53,8 +48,7 @@
             from Answers a
                 join Questions q on a.QuestionId = q.Id
                 join QuestionSets qs on q.QuestionSetId = qs.Id
-            where a.UserId = {0}
-";
+            where a.UserId = {0}";
 
         QuestionSets = _context.QuestionSets
             .FromSqlRaw(sql, userId)

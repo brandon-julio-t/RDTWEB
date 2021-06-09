@@ -150,10 +150,7 @@
     {
         IsEditing = false;
 
-        if (IsNew)
-        {
-            return;
-        }
+        if (IsNew) return;
 
         _context.Update(Question);
         _context.SaveChangesAsync();
