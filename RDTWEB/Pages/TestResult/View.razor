@@ -19,10 +19,6 @@
             <td>@CorrectAnswers</td>
         </tr>
         <tr>
-            <th>Opinionated Answers</th>
-            <td>@OpinionatedAnswers</td>
-        </tr>
-        <tr>
             <th>Total Questions</th>
             <td>@QuestionSet.Questions.Count</td>
         </tr>
@@ -87,7 +83,6 @@
 
     private QuestionSet QuestionSet { get; set; }
     private int CorrectAnswers { get; set; }
-    private int OpinionatedAnswers { get; set; }
 
     protected override async Task<Task> OnInitializedAsync()
     {
@@ -95,7 +90,7 @@
         var userId = _userManager.GetUserId(auth.User);
 
         QuestionSet = _context.QuestionSets
-            .Include(questionSet => questionSet.Questions)
+            .Include(questionSet => questionSet.Questions.OrderBy(question => question.Id))
             .ThenInclude(question => question.Answers)
             .AsSplitQuery()
             .Single(questionSet => questionSet.Id.ToString() == Id);
@@ -121,7 +116,10 @@
 
                 case "Essay":
                 case "Submit File":
-                    OpinionatedAnswers++;
+                    if (question.Answer.IsCorrect == true)
+                    {
+                        CorrectAnswers++;
+                    }
                     break;
             }
         });

@@ -27,8 +27,12 @@
         }
 
         <div>
-            <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">Mark answer as correct</button>
-            <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">Mark answer as incorrect</button>
+            <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">
+                @(answer.IsCorrect == true ? "✔" : "") Mark answer as correct
+            </button>
+            <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">
+                @(answer.IsCorrect == false ? "✔" : "") Mark answer as incorrect
+            </button>
         </div>
     </div>
 }

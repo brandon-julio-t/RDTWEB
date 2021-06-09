@@ -2,8 +2,6 @@
 
 @using Microsoft.AspNetCore.Hosting
 @using System.IO
-@using System.Transactions
-@using Microsoft.Extensions.Logging
 
 @attribute [Authorize(Roles = "Admin, Participant")]
 
@@ -93,7 +91,7 @@
     }
 </section>
 
-<NavLink href="/TestSchedules" class="btn btn-secondary">Back</NavLink>
+<NavLink href="TestSchedules" class="btn btn-secondary">Back</NavLink>
 
 @code {
 
@@ -108,7 +106,7 @@
         var userId = _userManager.GetUserId(state.User);
 
         QuestionSet = _context.QuestionSets
-            .Include(questionSet => questionSet.Questions)
+            .Include(questionSet => questionSet.Questions.OrderBy(question => question.Id))
             .ThenInclude(question => question.Answers.Where(answer => answer.UserId == userId))
             .AsSplitQuery()
             .Single(questionSet => questionSet.Id.ToString() == Id);
