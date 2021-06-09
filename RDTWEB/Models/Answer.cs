@@ -9,11 +9,10 @@ namespace RDTWEB.Models
         public string StringAnswer { get; set; }
         public bool? BooleanAnswer { get; set; }
         public int? ChosenIndex { get; set; }
+        public bool? IsCorrect { get; set; }
         public string UserId { get; set; }
         public virtual IdentityUser User { get; set; }
         public int QuestionId { get; set; }
         public virtual Question Question { get; set; }
-
-        [NotMapped] public IBrowserFile BrowserFile { get; set; }
     }
 }

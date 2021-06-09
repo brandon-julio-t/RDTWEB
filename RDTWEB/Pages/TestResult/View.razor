@@ -33,7 +33,7 @@
 <section>
     @foreach (var question in QuestionSet.Questions)
     {
-        <div class="my-4 p-4 border rounded">
+        <div class="my-4 p-4 border rounded @(question.Answer.IsCorrect == null ? "" : question.Answer.IsCorrect == true ? "bg-success text-white" : "bg-danger text-white")">
             <p class="font-weight-bold">@question.Body</p>
 
             @switch (question.Type)
@@ -108,11 +108,15 @@
             {
                 case "Multiple Choice":
                 case "Multiple Answer List":
-                    CorrectAnswers += question.CorrectChoiceIndex == question.Answer.ChosenIndex ? 1 : 0;
+                    var isChoiceCorrect = question.CorrectChoiceIndex == question.Answer.ChosenIndex;
+                    CorrectAnswers += isChoiceCorrect ? 1 : 0;
+                    question.Answer.IsCorrect = isChoiceCorrect;
                     break;
 
                 case "Boolean (true or false)":
-                    CorrectAnswers += question.BooleanAnswer == question.Answer.BooleanAnswer ? 1 : 0;
+                    var isBooleanCorrect = question.BooleanAnswer == question.Answer.BooleanAnswer;
+                    CorrectAnswers += isBooleanCorrect ? 1 : 0;
+                    question.Answer.IsCorrect = isBooleanCorrect;
                     break;
 
                 case "Essay":

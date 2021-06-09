@@ -49,6 +49,16 @@
                     </button>
                 </div>
             }
+            
+            @if (IsError)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Username must not be empty
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="() => IsError = false">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
 
             <EditForm Model="@FormModel" OnSubmit="@CreateUser">
                 <div class="form-group">
@@ -68,6 +78,7 @@
 
     private CreateUserForm FormModel { get; } = new();
     private bool IsSuccess { get; set; }
+    private bool IsError { get; set; }
 
     protected override async Task<Task> OnInitializedAsync()
     {
@@ -77,6 +88,11 @@
 
     private async Task CreateUser()
     {
+        if (FormModel.Username == "")
+        {
+            IsError = true;
+        }
+        
         var user = new IdentityUser
         {
             UserName = FormModel.Username,

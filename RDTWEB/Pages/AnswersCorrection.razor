@@ -1,0 +1,57 @@
+﻿@page "/AnswersCorrection"
+@inject ApplicationDbContext _context
+
+<h3>Answers Correction</h3>
+
+@for (var i = 0; i < Answers.Count; i++)
+{
+    var answer = Answers[i];
+
+    <div class="my-4 p-4 border rounded">
+        <p>
+            @(i + 1).
+            <span class="font-weight-bold">@answer.Question.Body</span>
+        </p>
+
+        @switch (answer.Question.Type)
+        {
+            case "Essay":
+                <div class="form-group">
+                    <textarea disabled class="form-control" rows="7">@answer.StringAnswer</textarea>
+                </div>
+                break;
+
+            case "Submit File":
+                <ViewFileInfo FilePath="@answer.StringAnswer"/>
+                break;
+        }
+
+        <div>
+            <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">Mark answer as correct</button>
+            <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">Mark answer as incorrect</button>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Answer> Answers { get; set; } = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        Answers = _context.Answers
+            .Include(answer => answer.Question)
+            .Where(answer => new[] {"Essay", "Submit File"}.Contains(answer.Question.Type))
+            .Where(answer => answer.StringAnswer != null)
+            .ToList();
+
+        return base.OnInitializedAsync();
+    }
+
+    private void CorrectAnswer(Answer answer, bool isCorrect)
+    {
+        answer.IsCorrect = isCorrect;
+        _context.Update(answer);
+        _context.SaveChangesAsync();
+    }
+
+}
