@@ -30,4 +30,10 @@
     <Folder Include="Storage\Answers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\Documentation.docx">
+      <Link>Documentation.docx</Link>
+    </Content>
+  </ItemGroup>
+
 </Project>
