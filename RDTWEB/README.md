@@ -5,8 +5,6 @@
 - Add feedback on mark answer
 - Add feedback on saving textarea
 - Add loading indicator
-- Add whether the answer is correct or not while correcting
-- Sort answer by corrected while correcting
 
 ## Technologies
 
