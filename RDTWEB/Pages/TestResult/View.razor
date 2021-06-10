@@ -35,51 +35,59 @@
 </section>
 
 <section>
-    @foreach (var question in QuestionSet.Questions)
-    {
-        <div class="my-4 p-4 border rounded @(question.Answer.IsCorrect switch { null => "", true => "bg-success text-white", _ => "bg-danger text-white" })">
-            <p class="font-weight-bold">@question.Body</p>
+    <Virtualize Items="QuestionSet.Questions">
+        <ItemContent>
+            <div class="my-4 p-4 border rounded @(context.Answer.IsCorrect switch { null => "", true => "bg-success text-white", _ => "bg-danger text-white" })">
+                <p class="font-weight-bold">@context.Body</p>
 
-            @switch (question.Type)
-            {
-                case "Multiple Choice":
-                case "Multiple Answer List":
-                    @for (var i = 0; i < question.Choices.Count; i++)
-                    {
-                        var idx = i;
+                @switch (context.Type)
+                {
+                    case "Multiple Choice":
+                    case "Multiple Answer List":
+                        @for (var i = 0; i < context.Choices.Count; i++)
+                        {
+                            var idx = i;
 
-                        <div class="form-group form-inline">
-                            <input disabled checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
-                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
+                            <div class="form-group form-inline">
+                                <input disabled checked="@(context.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                                <input disabled value="@context.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
+                            </div>
+                        }
+                        break;
+
+                    case "Boolean (true or false)":
+                        <div class="form-group">
+                            <div class="form-check form-check-inline">
+                                <input disabled checked="@context.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                                <label class="form-check-label" for="true">True</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input disabled checked="@(!context.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                                <label class="form-check-label" for="false">False</label>
+                            </div>
                         </div>
-                    }
-                    break;
+                        break;
 
-                case "Boolean (true or false)":
-                    <div class="form-group">
-                        <div class="form-check form-check-inline">
-                            <input disabled checked="@question.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
-                            <label class="form-check-label" for="true">True</label>
+                    case "Essay":
+                        <div class="form-group">
+                            <textarea disabled class="form-control" rows="7">@context.Answer.StringAnswer</textarea>
                         </div>
-                        <div class="form-check form-check-inline">
-                            <input disabled checked="@(!question.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
-                            <label class="form-check-label" for="false">False</label>
-                        </div>
-                    </div>
-                    break;
+                        break;
 
-                case "Essay":
-                    <div class="form-group">
-                        <textarea disabled class="form-control" rows="7">@question.Answer.StringAnswer</textarea>
-                    </div>
-                    break;
-
-                case "Submit File":
-                    <ViewFileInfo FilePath="@question.Answer.StringAnswer"/>
-                    break;
-            }
-        </div>
-    }
+                    case "Submit File":
+                        <ViewFileInfo FilePath="@context.Answer.StringAnswer"/>
+                        break;
+                }
+            </div>
+        </ItemContent>
+        <Placeholder>
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        </Placeholder>
+    </Virtualize>
 </section>
 
 <NavLink href="TestResults" class="btn btn-secondary">Back</NavLink>

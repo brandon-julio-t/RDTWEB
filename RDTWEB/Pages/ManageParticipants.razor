@@ -21,16 +21,28 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var user in Users)
-                {
-                    <tr>
-                        <td class="align-middle">@user.Id</td>
-                        <td class="align-middle">@user.Email</td>
-                        <td class="align-middle">
-                            <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(user)">Delete</button>
-                        </td>
-                    </tr>
-                }
+                <Virtualize Items="Users">
+                    <ItemContent>
+                        <tr>
+                            <td class="align-middle">@context.Id</td>
+                            <td class="align-middle">@context.Email</td>
+                            <td class="align-middle">
+                                <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(context)">Delete</button>
+                            </td>
+                        </tr>
+                    </ItemContent>
+                    <Placeholder>
+                        <tr>
+                            <td colspan="3">
+                                <div class="d-flex justify-content-center">
+                                  <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                  </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </Placeholder>
+                </Virtualize>
                 </tbody>
             </table>
         </div>

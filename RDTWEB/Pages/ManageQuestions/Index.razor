@@ -18,21 +18,34 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (var vm in QuestionSetViewModels)
-        {
-            <tr>
-                <td class="align-middle">@vm.QuestionSet.Id</td>
-                <td class="align-middle">@vm.QuestionSet.Title</td>
-                <td class="align-middle">@(vm.QuestionSet.StartAt?.ToString() ?? "-")</td>
-                <td class="align-middle">@(vm.QuestionSet.EndAt?.ToString() ?? "-")</td>
-                <td class="align-middle">
-                    <div class="btn-group" role="group" aria-label="Actions">
-                        <NavLink class="btn btn-secondary" href="@($"/ManageQuestions/{vm.QuestionSet.Id}")">View</NavLink>
-                        <button @onclick="() => OnDelete(vm)" class="btn btn-danger">Delete</button>
-                    </div>
-                </td>
-            </tr>
-        }
+        <Virtualize Items="QuestionSetViewModels">
+            <ItemContent>
+                <tr>
+                    <td class="align-middle">@context.QuestionSet.Id</td>
+                    <td class="align-middle">@context.QuestionSet.Title</td>
+                    <td class="align-middle">@(context.QuestionSet.StartAt?.ToString() ?? "-")</td>
+                    <td class="align-middle">@(context.QuestionSet.EndAt?.ToString() ?? "-")</td>
+                    <td class="align-middle">
+                        <div class="btn-group" role="group" aria-label="Actions">
+                            <NavLink class="btn btn-secondary" href="@($"/ManageQuestions/{context.QuestionSet.Id}")">View</NavLink>
+                            <button @onclick="() => OnDelete(context)" class="btn btn-danger">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            </ItemContent>
+            <Placeholder>
+                <tr>
+                    <td colspan="5">
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </Placeholder>
+        </Virtualize>
+
         </tbody>
     </table>
 </div>
@@ -51,7 +64,7 @@
     {
         _context.Remove(vm.QuestionSet);
         await _context.SaveChangesAsync();
-        
+
         QuestionSetViewModels.Remove(vm);
         StateHasChanged();
     }

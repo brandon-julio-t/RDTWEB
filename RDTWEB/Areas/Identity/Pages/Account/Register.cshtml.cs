@@ -41,51 +41,14 @@ namespace RDTWEB.Areas.Identity.Pages.Account
 
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public IActionResult OnGet()
         {
-            ReturnUrl = returnUrl;
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            return RedirectToPage("Login");
         }
-
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        
+        public IActionResult OnPost()
         {
-            returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
-            {
-                var user = new IdentityUser {UserName = Input.Email, Email = Input.Email};
-                var result = await _userManager.CreateAsync(user, Input.Password);
-                await _userManager.AddToRoleAsync(user, "Participant");
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User created a new account with password.");
-
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        null,
-                        new {area = "Identity", userId = user.Id, code, returnUrl},
-                        Request.Scheme);
-
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage("RegisterConfirmation", new {email = Input.Email, returnUrl});
-                    }
-
-                    await _signInManager.SignInAsync(user, false);
-                    return LocalRedirect(returnUrl);
-                }
-
-                foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            // If we got this far, something failed, redisplay form
-            return Page();
+            return RedirectToPage("Login");
         }
 
         public class InputModel

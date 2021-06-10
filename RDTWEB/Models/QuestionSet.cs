@@ -20,7 +20,7 @@ namespace RDTWEB.Models
         {
             get
             {
-                if (_status != "T口T") return _status;
+                if (_status == "Finalized") return _status;
                 
                 if (StartAt == null || EndAt == null) return _status = "-";
 
@@ -36,7 +36,7 @@ namespace RDTWEB.Models
 
                 return _status = "T口T"; // should not reach here
             }
-            set => _status = value;
+            private set => _status = value;
         }
 
         public void UpdateStatusByUserId(string userId)
