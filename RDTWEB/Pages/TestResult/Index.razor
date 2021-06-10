@@ -20,19 +20,19 @@
         </tr>
         </thead>
         <tbody>
-            <Virtualize Items="QuestionSets">
-                <ItemContent>
-                    <tr class="@GetTrClassByStatus(context)">
-                        <td class="align-middle">@context.Title</td>
-                        <td class="align-middle">@context.StartAt?.ToString("U")</td>
-                        <td class="align-middle">@context.EndAt?.ToString("U")</td>
-                        <td class="align-middle">@context.Status</td>
-                        <td class="align-middle">
-                            <NavLink href="@($"/TestResults/{context.Id}")" class="btn btn-primary">View Result</NavLink>
-                        </td>
-                    </tr>
+        <Virtualize Items="QuestionSets">
+            <ItemContent>
+                <tr class="@GetTrClassByStatus(context)">
+                    <td class="align-middle">@context.Title</td>
+                    <td class="align-middle">@context.StartAt?.ToString("U")</td>
+                    <td class="align-middle">@context.EndAt?.ToString("U")</td>
+                    <td class="align-middle">@context.Status</td>
+                    <td class="align-middle">
+                        <NavLink href="@($"/TestResults/{context.Id}")" class="btn btn-primary">View Result</NavLink>
+                    </td>
+                </tr>
 
-                </ItemContent>
+            </ItemContent>
             <Placeholder>
                 <tr>
                     <td colspan="5">
@@ -44,12 +44,13 @@
                     </td>
                 </tr>
             </Placeholder>
-            </Virtualize>
+        </Virtualize>
         </tbody>
     </table>
 </div>
 
 @code {
+
     private List<QuestionSet> QuestionSets { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
@@ -63,14 +64,15 @@
             .Where(questionSet => questionSet.Questions.All(question => question.Answers.Count > 0))
             .Distinct()
             .OrderByDescending(questionSet => questionSet.StartAt)
-            .AsSplitQuery()
             .ToListAsync();
 
         QuestionSets.ForEach(questionSet => questionSet.UpdateStatusByUserId(userId));
         QuestionSets = QuestionSets.Where(questionSet => questionSet.Status == "Finalized").ToList();
     }
 
-    private static string GetTrClassByStatus(QuestionSet questionSet) =>
-        questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
+    private static string GetTrClassByStatus(QuestionSet questionSet)
+    {
+        return questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
+    }
 
 }

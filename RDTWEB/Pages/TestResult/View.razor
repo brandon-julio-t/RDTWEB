@@ -1,5 +1,4 @@
 ﻿@page "/TestResults/{id?}"
-
 @using Microsoft.AspNetCore.Hosting
 
 @attribute [Authorize(Roles = "Admin, Participant")]
@@ -109,7 +108,6 @@
         QuestionSet = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions.OrderByDescending(question => question.Id))
             .ThenInclude(question => question.Answers)
-            .AsSplitQuery()
             .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions.ForEach(question =>

@@ -7,12 +7,12 @@ namespace RDTWEB.Controllers
 {
     public class StorageController : Controller
     {
-        private IWebHostEnvironment Env { get; }
-
         public StorageController(IWebHostEnvironment env)
         {
             Env = env;
         }
+
+        private IWebHostEnvironment Env { get; }
 
         [Route("Storage/{**path}")]
         public ActionResult Index(string path)

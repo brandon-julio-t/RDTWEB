@@ -26,11 +26,9 @@ namespace RDTWEB
                 var testUserPw = config["DefaultPassword"];
 
                 if (config.GetValue<bool>("Seed"))
-                {
                     // Please relog after seeding, because authentication session will contain wrong user id
                     // because the previous user id has been deleted due to seeding.
                     SeedData.Initialize(services, testUserPw).Wait();
-                }
             }
             catch (Exception ex)
             {

@@ -14,19 +14,21 @@ namespace RDTWEB
 {
     public class Startup
     {
-        private IConfiguration Configuration { get; }
-        private IWebHostEnvironment Env { get; }
-
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
             Env = env;
         }
 
+        private IConfiguration Configuration { get; }
+        private IWebHostEnvironment Env { get; }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseLazyLoadingProxies().UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+                options.UseLazyLoadingProxies()
+                    .UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+                        o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
                     .UseLoggerFactory(LoggerFactory.Create(configure =>
                         configure.AddConsole()
                             .AddFilter("", Env.IsDevelopment() ? LogLevel.Information : LogLevel.Warning))));

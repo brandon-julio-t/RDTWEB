@@ -33,16 +33,20 @@
 <NavLink href="ManageQuestions" class="btn btn-secondary">Back</NavLink>
 
 @code {
+
     private QuestionSet QuestionSet { get; set; } = new();
     private bool IsSuccess { get; set; }
 
-    private void AddNewQuestion() => QuestionSet.Questions.Add(new Question());
+    private void AddNewQuestion()
+    {
+        QuestionSet.Questions.Add(new Question());
+    }
 
     private async Task SaveQuestionSet()
     {
         await _context.AddAsync(QuestionSet);
         await _context.SaveChangesAsync();
-        
+
         QuestionSet = new QuestionSet();
         IsSuccess = true;
         StateHasChanged();

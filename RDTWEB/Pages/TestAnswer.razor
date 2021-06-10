@@ -1,5 +1,4 @@
 ﻿@page "/TestAnswer/{id?}"
-
 @using Microsoft.AspNetCore.Hosting
 
 @attribute [Authorize(Roles = "Admin, Participant")]
@@ -149,7 +148,6 @@ else
         QuestionSet = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions.OrderBy(question => question.Id))
             .ThenInclude(question => question.Answers.Where(answer => answer.UserId == userId))
-            .AsSplitQuery()
             .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions
@@ -198,7 +196,7 @@ else
             .ForEach(answer =>
             {
                 answer.IsFinalized = true;
-                
+
                 try
                 {
                     _context.Add(answer);

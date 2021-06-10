@@ -5,7 +5,7 @@
 
 1. ASP.NET Core 5.0
 1. ASP.Net Core Identity
-1. Blazor Server
+1. Blazor (Server)
 1. Bootstrap 4.3.1
 1. Entity Framework Core
 1. SQL Server
@@ -33,8 +33,8 @@
  > [x] make a mock data for the question, user, and schedule
  > [ ] make a documentation for the application you made / video documentation
 
- > [ ] Please concern with the efficiency of the application regarding memory, server load, easy to use, and access time.
+ > [x] Please concern with the efficiency of the application regarding memory, server load, easy to use, and access time.
   describe the efficiency in the documentation
 
- > [ ] find a recent technology and design an application that can be made using the technology, write it in a document,
+ > [x] find a recent technology and design an application that can be made using the technology, write it in a document,
  describe the app and in which part / feature the technology can be used

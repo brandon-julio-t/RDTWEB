@@ -7,21 +7,20 @@ namespace RDTWEB.Models
 {
     public class QuestionSet
     {
+        private string _status = "T口T"; // should not be this crying emoji
         public int Id { get; set; }
         public string Title { get; set; }
         public DateTime? StartAt { get; set; }
         public DateTime? EndAt { get; set; }
         public virtual List<Question> Questions { get; set; } = new();
 
-        private string _status = "T口T"; // should not be this crying emoji
-        
         [NotMapped]
         public string Status
         {
             get
             {
                 if (_status == "Finalized") return _status;
-                
+
                 if (StartAt == null || EndAt == null) return _status = "-";
 
                 var now = DateTime.Now;

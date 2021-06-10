@@ -1,4 +1,5 @@
 ﻿@page "/AnswersCorrection"
+@attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext _context
 
 <h3>Answers Correction</h3>
@@ -86,6 +87,7 @@
 </main>
 
 @code {
+
     private List<Answer> Answers { get; set; } = new();
     private List<Answer> CorrectedAnswers => Answers.Where(answer => answer.IsCorrect != null).ToList();
     private List<Answer> PendingCorrectionAnswers => Answers.Where(answer => answer.IsCorrect == null).ToList();

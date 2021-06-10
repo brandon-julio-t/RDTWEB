@@ -56,13 +56,18 @@ else
     {
         QuestionSet = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions)
-            .AsSplitQuery()
             .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
     }
 
-    private void AddQuestion() => QuestionSet.Questions.Add(new Question());
+    private void AddQuestion()
+    {
+        QuestionSet.Questions.Add(new Question());
+    }
 
-    private void OnQuestionDeleted(Question question) => QuestionSet.Questions.Remove(question);
+    private void OnQuestionDeleted(Question question)
+    {
+        QuestionSet.Questions.Remove(question);
+    }
 
     private async Task UpdateQuestionSet()
     {

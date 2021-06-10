@@ -57,6 +57,7 @@
 </div>
 
 @code {
+
     private List<QuestionSet> QuestionSets { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
@@ -73,7 +74,9 @@
         QuestionSets.ForEach(questionSet => questionSet.UpdateStatusByUserId(userId));
     }
 
-    private static string GetTrClassByStatus(QuestionSet questionSet) =>
-        questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
+    private static string GetTrClassByStatus(QuestionSet questionSet)
+    {
+        return questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
+    }
 
 }

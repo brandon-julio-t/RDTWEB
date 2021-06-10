@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RDTWEB.Models;
@@ -22,13 +19,14 @@ namespace RDTWEB
             var transaction = await context.Database.BeginTransactionAsync();
             await context.Database.ExecuteSqlRawAsync("delete from Answers");
             await context.Database.ExecuteSqlRawAsync("delete from Questions; DBCC CHECKIDENT (Questions, RESEED, 0)");
-            await context.Database.ExecuteSqlRawAsync("delete from QuestionSets; DBCC CHECKIDENT (QuestionSets, RESEED, 0)");
+            await context.Database.ExecuteSqlRawAsync(
+                "delete from QuestionSets; DBCC CHECKIDENT (QuestionSets, RESEED, 0)");
             await context.Database.ExecuteSqlRawAsync("delete from AspNetUsers");
             await transaction.CommitAsync();
-            
+
             var adminId = await EnsureUser(serviceProvider, testUserPw, "admin@email.com");
             await EnsureRole(serviceProvider, adminId, "Admin");
-            
+
             await EnsureUserRole(serviceProvider, testUserPw, "bran@email.com", "Participant");
             await EnsureUserRole(serviceProvider, testUserPw, "onel@email.com", "Participant");
             await EnsureUserRole(serviceProvider, testUserPw, "cleo@email.com", "Participant");
@@ -37,11 +35,11 @@ namespace RDTWEB
             await EnsureUserRole(serviceProvider, testUserPw, "clar@email.com", "Participant");
             await EnsureUserRole(serviceProvider, testUserPw, "cent@email.com", "Participant");
             await EnsureUserRole(serviceProvider, testUserPw, "joph@email.com", "Participant");
-            
-            SeedDb(context, adminId);
+
+            SeedDb(context);
         }
 
-        private static void SeedDb(DbContext context, string adminId)
+        private static void SeedDb(DbContext context)
         {
             Enumerable.Range(1, 10)
                 .Select(i => new QuestionSet
@@ -66,7 +64,8 @@ namespace RDTWEB
                         {
                             Body = "The fifth answer is correct",
                             Type = "Multiple Answer List",
-                            Choices = new List<string> {"Correct", "fifth answer", "Fifth Answer", "wrong", "wrong answer"},
+                            Choices = new List<string>
+                                {"Correct", "fifth answer", "Fifth Answer", "wrong", "wrong answer"},
                             CorrectChoiceIndex = 4
                         },
                         new() {Body = "In 250 words, please tell us about yourself", Type = "Essay"},
@@ -96,10 +95,7 @@ namespace RDTWEB
             string userName)
         {
             var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
-            if (userManager == null)
-            {
-                return null;
-            }
+            if (userManager == null) return null;
 
             var user = await userManager.FindByNameAsync(userName);
             if (user == null)
