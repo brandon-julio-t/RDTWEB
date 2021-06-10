@@ -1,9 +1,6 @@
 # RDTWEB
  RDT Test (as of 2021)
 
-## TODO
-> ...
-
 ## Technologies
 
 1. ASP.NET Core 5.0
