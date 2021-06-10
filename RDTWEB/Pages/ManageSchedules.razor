@@ -53,20 +53,19 @@
 @code {
     private List<QuestionSetViewModel> QuestionSetViewModels { get; set; } = new();
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        QuestionSetViewModels = _context.QuestionSets
+        QuestionSetViewModels = await _context.QuestionSets
             .Select(questionSet => new QuestionSetViewModel {QuestionSet = questionSet})
-            .ToList();
-
-        return base.OnInitializedAsync();
+            .ToListAsync();
     }
 
-    private void UpdateQuestionSetSchedule(QuestionSetViewModel vm)
+    private async Task UpdateQuestionSetSchedule(QuestionSetViewModel vm)
     {
-        vm.IsEditing = false;
         _context.Update(vm.QuestionSet);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
+        vm.IsEditing = false;
+        StateHasChanged();
     }
 
 }

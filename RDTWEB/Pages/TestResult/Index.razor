@@ -1,5 +1,5 @@
 ﻿@page "/TestResults"
-@using Castle.Core.Internal
+
 @attribute [Authorize(Roles = "Admin, Participant")]
 
 @inject ApplicationDbContext _context
@@ -39,29 +39,25 @@
 @code {
     private List<QuestionSet> QuestionSets { get; set; } = new();
 
-    protected override async Task<Task> OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         var auth = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userId = _userManager.GetUserId(auth.User);
 
-        QuestionSets = _context.QuestionSets
+        QuestionSets = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions)
             .ThenInclude(question => question.Answers.Where(answer => answer.IsFinalized && answer.UserId == userId))
             .Where(questionSet => questionSet.Questions.All(question => question.Answers.Count > 0))
             .Distinct()
             .OrderByDescending(questionSet => questionSet.StartAt)
             .AsSplitQuery()
-            .ToList();
+            .ToListAsync();
 
         QuestionSets.ForEach(questionSet => questionSet.UpdateStatusByUserId(userId));
         QuestionSets = QuestionSets.Where(questionSet => questionSet.Status == "Finalized").ToList();
-
-        return base.OnInitializedAsync();
     }
 
-    private static string GetTrClassByStatus(QuestionSet questionSet)
-    {
-        return questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
-    }
+    private static string GetTrClassByStatus(QuestionSet questionSet) =>
+        questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
 
 }

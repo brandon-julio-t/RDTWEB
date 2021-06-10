@@ -11,9 +11,9 @@
 
     <hr/>
 
-    @for (var i = 0; i < Questions.Count; i++)
+    @for (var i = 0; i < QuestionSet.Questions.Count; i++)
     {
-        var question = Questions[i];
+        var question = QuestionSet.Questions[i];
         <ViewQuestion Question="question" Number="i + 1" IsEditing="true" IsNew="true"/>
     }
 </section>
@@ -30,29 +30,22 @@
 
 <button @onclick="AddNewQuestion" class="btn btn-primary">Add Question</button>
 <button @onclick="SaveQuestionSet" class="btn btn-success">Save</button>
-<NavLink href="/ManageQuestions" class="btn btn-danger">Cancel</NavLink>
+<NavLink href="ManageQuestions" class="btn btn-secondary">Back</NavLink>
 
 @code {
-    private List<Question> Questions { get; set; } = new();
-
     private QuestionSet QuestionSet { get; set; } = new();
     private bool IsSuccess { get; set; }
 
-    private void AddNewQuestion()
-    {
-        Questions.Add(new Question());
-    }
+    private void AddNewQuestion() => QuestionSet.Questions.Add(new Question());
 
-    private void SaveQuestionSet()
+    private async Task SaveQuestionSet()
     {
-        QuestionSet.Questions = Questions;
-        _context.Add(QuestionSet);
-        _context.SaveChangesAsync();
-
+        await _context.AddAsync(QuestionSet);
+        await _context.SaveChangesAsync();
+        
         QuestionSet = new QuestionSet();
-        Questions = new List<Question>();
-
         IsSuccess = true;
+        StateHasChanged();
     }
 
 }

@@ -89,20 +89,20 @@
     [Parameter]
     public string Id { get; set; }
 
-    private QuestionSet QuestionSet { get; set; }
+    private QuestionSet QuestionSet { get; set; } = new();
     private int CorrectAnswers { get; set; }
     private int PendingCorrections { get; set; }
 
-    protected override async Task<Task> OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         var auth = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userId = _userManager.GetUserId(auth.User);
 
-        QuestionSet = _context.QuestionSets
+        QuestionSet = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions.OrderByDescending(question => question.Id))
             .ThenInclude(question => question.Answers)
             .AsSplitQuery()
-            .Single(questionSet => questionSet.Id.ToString() == Id);
+            .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions.ForEach(question =>
         {
@@ -140,8 +140,6 @@
                     break;
             }
         });
-
-        return base.OnInitializedAsync();
     }
 
 }

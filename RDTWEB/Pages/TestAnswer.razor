@@ -135,56 +135,54 @@ else
     [Parameter]
     public string Id { get; set; }
 
-    private QuestionSet QuestionSet { get; set; }
+    private QuestionSet QuestionSet { get; set; } = new();
 
     private bool IsFinalizing { get; set; }
 
     private bool IsFinalized => QuestionSet.Questions.All(question => question.Answer.IsFinalized);
 
-    protected override async Task<Task> OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userId = _userManager.GetUserId(state.User);
 
-        QuestionSet = _context.QuestionSets
+        QuestionSet = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions.OrderBy(question => question.Id))
             .ThenInclude(question => question.Answers.Where(answer => answer.UserId == userId))
             .AsSplitQuery()
-            .Single(questionSet => questionSet.Id.ToString() == Id);
+            .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions
             .ForEach(question =>
                 question.Answer = question.Answers
                     .SingleOrDefault(answer => answer.UserId == userId)
                                   ?? new Answer {UserId = userId, QuestionId = question.Id});
-
-        return base.OnInitializedAsync();
     }
 
-    private void SaveIndex(Answer answer, int idx)
+    private async Task SaveIndex(Answer answer, int idx)
     {
         answer.ChosenIndex = idx;
-        SaveOrUpdateAnswer(answer);
+        await SaveOrUpdateAnswer(answer);
     }
 
-    private void SaveBoolean(Answer answer, bool boolean)
+    private async Task SaveBoolean(Answer answer, bool boolean)
     {
         answer.BooleanAnswer = boolean;
-        SaveOrUpdateAnswer(answer);
+        await SaveOrUpdateAnswer(answer);
     }
 
-    private void SaveOrUpdateAnswer(Answer answer)
+    private async Task SaveOrUpdateAnswer(Answer answer)
     {
         try
         {
-            _context.Add(answer);
-            _context.SaveChanges();
+            await _context.AddAsync(answer);
+            await _context.SaveChangesAsync();
         }
         catch (Exception)
         {
     // Entity exists, update it instead.
             _context.Update(answer);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 
@@ -192,7 +190,7 @@ else
     {
         var confirmed = await _jsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
         if (!confirmed) return;
-        
+
         IsFinalizing = true;
 
         QuestionSet.Questions.Select(question => question.Answer)
@@ -200,7 +198,7 @@ else
             .ForEach(answer =>
             {
                 answer.IsFinalized = true;
-
+                
                 try
                 {
                     _context.Add(answer);
@@ -215,6 +213,7 @@ else
             });
 
         IsFinalizing = false;
+        StateHasChanged();
     }
 
 }

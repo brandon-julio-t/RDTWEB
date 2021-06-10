@@ -43,42 +43,35 @@ else
     <NavLink href="ManageQuestions" class="btn btn-secondary">Back</NavLink>
 }
 
-
 @code {
 
     [Parameter]
     public string Id { get; set; }
 
-    private QuestionSet QuestionSet { get; set; }
+    private QuestionSet QuestionSet { get; set; } = new();
     private bool IsEditing { get; set; }
     private bool IsUpdateSuccess { get; set; }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        QuestionSet = _context.QuestionSets
+        QuestionSet = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions)
             .AsSplitQuery()
-            .Single(questionSet => questionSet.Id.ToString() == Id);
-
-        return base.OnInitializedAsync();
+            .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
     }
 
-    private void AddQuestion()
-    {
-        QuestionSet.Questions.Add(new Question());
-    }
+    private void AddQuestion() => QuestionSet.Questions.Add(new Question());
 
-    private void UpdateQuestionSet()
+    private void OnQuestionDeleted(Question question) => QuestionSet.Questions.Remove(question);
+
+    private async Task UpdateQuestionSet()
     {
+        _context.Update(QuestionSet);
+        await _context.SaveChangesAsync();
+
         IsUpdateSuccess = true;
         IsEditing = false;
-        _context.Update(QuestionSet);
-        _context.SaveChangesAsync();
-    }
-
-    private void OnQuestionDeleted(Question question)
-    {
-        QuestionSet.Questions.Remove(question);
+        StateHasChanged();
     }
 
 }

@@ -18,13 +18,9 @@ namespace RDTWEB.Controllers
         public ActionResult Index(string path)
         {
             var absolutePath = Path.Combine(Env.ContentRootPath, "Storage", path);
-
             var split = path.Split("/");
             var filename = split.Last();
-
-            var bytes = System.IO.File.ReadAllBytes(absolutePath);
-
-            return File(bytes, "application/force-download", filename);
+            return File(System.IO.File.ReadAllBytes(absolutePath), "application/force-download", filename);
         }
     }
 }

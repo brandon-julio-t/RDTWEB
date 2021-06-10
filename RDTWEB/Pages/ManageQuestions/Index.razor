@@ -4,7 +4,7 @@
 
 <h3>Manage Questions</h3>
 
-<NavLink href="/ManageQuestions/Create" class="btn btn-primary my-4">Create New Question Set</NavLink>
+<NavLink href="ManageQuestions/Create" class="btn btn-primary my-4">Create New Question Set</NavLink>
 
 <div class="table-responsive">
     <table class="table table-hover">
@@ -40,27 +40,20 @@
 @code {
     private List<QuestionSetViewModel> QuestionSetViewModels { get; set; } = new();
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        QuestionSetViewModels = _context.QuestionSets
+        QuestionSetViewModels = await _context.QuestionSets
             .Select(questionSet => new QuestionSetViewModel {QuestionSet = questionSet})
-            .ToList();
-
-        return base.OnInitializedAsync();
+            .ToListAsync();
     }
 
-    private void RefreshQuestionSets()
+    private async Task OnDelete(QuestionSetViewModel vm)
     {
-        QuestionSetViewModels = _context.QuestionSets
-            .Select(questionSet => new QuestionSetViewModel {QuestionSet = questionSet})
-            .ToList();
-    }
-
-    private void OnDelete(QuestionSetViewModel vm)
-    {
-        QuestionSetViewModels.Remove(vm);
         _context.Remove(vm.QuestionSet);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
+        
+        QuestionSetViewModels.Remove(vm);
+        StateHasChanged();
     }
 
 }

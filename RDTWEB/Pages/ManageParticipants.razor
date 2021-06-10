@@ -49,7 +49,7 @@
                     </button>
                 </div>
             }
-            
+
             @if (IsError)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -80,11 +80,8 @@
     private bool IsSuccess { get; set; }
     private bool IsError { get; set; }
 
-    protected override async Task<Task> OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() =>
         Users = (await _userManager.GetUsersInRoleAsync("Participant")).ToList();
-        return base.OnInitializedAsync();
-    }
 
     private async Task CreateUser()
     {
@@ -92,7 +89,7 @@
         {
             IsError = true;
         }
-        
+
         var user = new IdentityUser
         {
             UserName = FormModel.Username,
@@ -100,19 +97,20 @@
             EmailConfirmed = true
         };
 
-        FormModel.Username = "";
-        IsSuccess = true;
-
-        Users.Add(user);
-
         await _userManager.CreateAsync(user, _config["DefaultPassword"]);
         await _userManager.AddToRoleAsync(user, "Participant");
+
+        Users.Add(user);
+        FormModel.Username = "";
+        IsSuccess = true;
+        StateHasChanged();
     }
 
-    private void DeleteUser(IdentityUser user)
+    private async Task DeleteUser(IdentityUser user)
     {
-        _userManager.DeleteAsync(user);
+        await _userManager.DeleteAsync(user);
         Users.Remove(user);
+        StateHasChanged();
     }
 
     public class CreateUserForm

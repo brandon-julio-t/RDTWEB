@@ -90,23 +90,22 @@
     private List<Answer> CorrectedAnswers => Answers.Where(answer => answer.IsCorrect != null).ToList();
     private List<Answer> PendingCorrectionAnswers => Answers.Where(answer => answer.IsCorrect == null).ToList();
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        Answers = _context.Answers
+        Answers = await _context.Answers
             .Include(answer => answer.Question)
             .Where(answer => new[] {"Essay", "Submit File"}.Contains(answer.Question.Type))
             .Where(answer => answer.StringAnswer != null)
             .OrderByDescending(answer => answer.Question.Id)
-            .ToList();
-
-        return base.OnInitializedAsync();
+            .ToListAsync();
     }
 
-    private void CorrectAnswer(Answer answer, bool isCorrect)
+    private async Task CorrectAnswer(Answer answer, bool isCorrect)
     {
-        answer.IsCorrect = isCorrect;
         _context.Update(answer);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
+        answer.IsCorrect = isCorrect;
+        StateHasChanged();
     }
 
 }

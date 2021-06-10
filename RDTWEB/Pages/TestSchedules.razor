@@ -45,27 +45,23 @@
 </div>
 
 @code {
-    private List<QuestionSet> QuestionSets { get; set; }
+    private List<QuestionSet> QuestionSets { get; set; } = new();
 
-    protected override async Task<Task> OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        QuestionSets = _context.QuestionSets
+        QuestionSets = await _context.QuestionSets
             .Where(questionSet => questionSet.StartAt != null)
             .Where(questionSet => questionSet.EndAt != null)
             .OrderByDescending(questionSet => questionSet.StartAt)
-            .ToList();
+            .ToListAsync();
         
         var auth = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userId = _userManager.GetUserId(auth.User);
         
         QuestionSets.ForEach(questionSet => questionSet.UpdateStatusByUserId(userId));
-
-        return base.OnInitializedAsync();
     }
 
-    private static string GetTrClassByStatus(QuestionSet questionSet)
-    {
-        return questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
-    }
+    private static string GetTrClassByStatus(QuestionSet questionSet) =>
+        questionSet.Status switch { "Ongoing" => "bg-success text-white", _ => "" };
 
 }
