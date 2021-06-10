@@ -1,0 +1,51 @@
+﻿@inject ApplicationDbContext _context
+
+@if (Answer.IsFinalized)
+{
+    <div class="form-group">
+        <textarea disabled class="form-control" rows="7"></textarea>
+    </div>
+}
+else
+{
+    <div class="form-group">
+        <textarea @bind="Answer.StringAnswer" class="form-control" rows="7"></textarea>
+    </div>
+
+    <button @onclick="() => SaveOrUpdateAnswer(Answer)" disabled="@IsSaving" class="btn btn-primary">
+        @if (IsSaving)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        }
+        Save
+    </button>
+}
+
+
+@code {
+
+    [Parameter]
+    public Answer Answer { get; set; }
+
+    private bool IsSaving { get; set; }
+
+    private void SaveOrUpdateAnswer(Answer answer)
+    {
+        IsSaving = true;
+
+        try
+        {
+            _context.Add(answer);
+            _context.SaveChanges();
+        }
+        catch (Exception)
+        {
+    // Entity exists, update it instead.
+            _context.Update(answer);
+            _context.SaveChanges();
+        }
+
+        IsSaving = false;
+    }
+
+}

@@ -70,7 +70,8 @@ namespace RDTWEB
                             CorrectChoiceIndex = 4
                         },
                         new() {Body = "In 250 words, please tell us about yourself", Type = "Essay"},
-                        new() {Body = "Please upload your resume", Type = "Submit File"}
+                        new() {Body = "Please upload your resume", Type = "Submit File"},
+                        new() {Body = "Please upload your code", Type = "Submit File"}
                     }
                 })
                 .ToList()

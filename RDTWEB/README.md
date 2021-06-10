@@ -2,16 +2,16 @@
  RDT Test (as of 2021)
 
 ## TODO
-- Add feedback on mark answer
-- Add feedback on saving textarea
-- Add loading indicator
+> ...
 
 ## Technologies
 
+1. ASP.NET Core 5.0
+1. ASP.Net Core Identity
 1. Blazor Server
-1. Entity Framework Core
 1. Bootstrap 4.3.1
-
+1. Entity Framework Core
+1. SQL Server
 
  > Create a web application following these specifications:
 

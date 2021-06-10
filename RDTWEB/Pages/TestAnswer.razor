@@ -1,7 +1,6 @@
 ﻿@page "/TestAnswer/{id?}"
 
 @using Microsoft.AspNetCore.Hosting
-@using System.IO
 
 @attribute [Authorize(Roles = "Admin, Participant")]
 
@@ -9,6 +8,7 @@
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject UserManager<IdentityUser> _userManager
 @inject IWebHostEnvironment _env
+@inject IJSRuntime _jsRuntime
 
 <h3>Information</h3>
 
@@ -52,44 +52,81 @@
                     {
                         var idx = j;
 
-                        <div class="form-group form-inline">
-                            <input @onchange="() => SaveIndex(question.Answer, idx)" checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
-                            <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
-                        </div>
+                        @if (question.Answer.IsFinalized)
+                        {
+                            <div class="form-group form-inline">
+                                <input disabled checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                                <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group form-inline">
+                                <input @onchange="() => SaveIndex(question.Answer, idx)" checked="@(question.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                                <input disabled value="@question.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
+                            </div>
+                        }
                     }
                     break;
 
                 case "Boolean (true or false)":
-                    <div class="form-group">
-                        <div class="form-check form-check-inline">
-                            <input @onchange="() => SaveBoolean(question.Answer, true)" checked="@question.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
-                            <label class="form-check-label" for="true">True</label>
+                    @if (question.Answer.IsFinalized)
+                    {
+                        <div class="form-group">
+                            <div class="form-check form-check-inline">
+                                <input disabled checked="@question.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                                <label class="form-check-label" for="true">True</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input disabled checked="@(!question.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                                <label class="form-check-label" for="false">False</label>
+                            </div>
                         </div>
-                        <div class="form-check form-check-inline">
-                            <input @onchange="() => SaveBoolean(question.Answer, false)" checked="@(!question.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
-                            <label class="form-check-label" for="false">False</label>
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            <div class="form-check form-check-inline">
+                                <input @onchange="() => SaveBoolean(question.Answer, true)" checked="@question.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                                <label class="form-check-label" for="true">True</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input @onchange="() => SaveBoolean(question.Answer, false)" checked="@(!question.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                                <label class="form-check-label" for="false">False</label>
+                            </div>
                         </div>
-                    </div>
+                    }
                     break;
 
                 case "Essay":
-                    <div class="form-group">
-                        <textarea @bind="question.Answer.StringAnswer" class="form-control" rows="7"></textarea>
-                    </div>
-                    <button @onclick="() => SaveEssay(question.Answer)" class="btn btn-primary">Save</button>
+                    <InputEssay Answer="@question.Answer"/>
                     break;
 
                 case "Submit File":
-                    <div class="form-group">
-                        <InputFile OnChange="e => SaveFile(question.Answer, e.File)" class="form-control-file"/>
-                    </div>
-
+                    <InputFileUploader Answer="@question.Answer" OnUploaded="StateHasChanged"/>
                     <ViewFileInfo FilePath="@question.Answer.StringAnswer"/>
                     break;
             }
         </div>
     }
 </section>
+
+@if (IsFinalized)
+{
+    <button disabled class="btn btn-success disabled">
+        Finalized
+    </button>
+}
+else
+{
+    <button @onclick="OnFinalizeAnswers" disabled="@IsFinalizing" class="btn btn-success">
+        @if (IsFinalizing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        }
+        Finalize Answers
+    </button>
+}
 
 <NavLink href="TestSchedules" class="btn btn-secondary">Back</NavLink>
 
@@ -99,6 +136,10 @@
     public string Id { get; set; }
 
     private QuestionSet QuestionSet { get; set; }
+
+    private bool IsFinalizing { get; set; }
+
+    private bool IsFinalized => QuestionSet.Questions.All(question => question.Answer.IsFinalized);
 
     protected override async Task<Task> OnInitializedAsync()
     {
@@ -132,33 +173,6 @@
         SaveOrUpdateAnswer(answer);
     }
 
-    private void SaveEssay(Answer answer)
-    {
-        SaveOrUpdateAnswer(answer);
-    }
-
-    private async Task SaveFile(Answer answer, IBrowserFile browserFile)
-    {
-        var previousPath = answer.StringAnswer;
-
-        var name = browserFile.Name;
-        var extension = name[name.LastIndexOf(".", StringComparison.Ordinal)..];
-
-        var path = Path.Combine("Storage", "Answers", Path.GetRandomFileName() + extension);
-        await using var file = File.Create(path);
-        file.Seek(0, SeekOrigin.Begin);
-        await browserFile.OpenReadStream(512000000).CopyToAsync(file);
-
-        answer.StringAnswer = path;
-        SaveOrUpdateAnswer(answer);
-
-        if (string.IsNullOrWhiteSpace(previousPath))
-            return;
-
-        var absolutePath = Path.Combine(_env.ContentRootPath, previousPath);
-        File.Delete(absolutePath);
-    }
-
     private void SaveOrUpdateAnswer(Answer answer)
     {
         try
@@ -172,6 +186,35 @@
             _context.Update(answer);
             _context.SaveChanges();
         }
+    }
+
+    private async Task OnFinalizeAnswers()
+    {
+        var confirmed = await _jsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (!confirmed) return;
+        
+        IsFinalizing = true;
+
+        QuestionSet.Questions.Select(question => question.Answer)
+            .ToList()
+            .ForEach(answer =>
+            {
+                answer.IsFinalized = true;
+
+                try
+                {
+                    _context.Add(answer);
+                    _context.SaveChanges();
+                }
+                catch (Exception)
+                {
+    // Entity exists, update it instead.
+                    _context.Update(answer);
+                    _context.SaveChanges();
+                }
+            });
+
+        IsFinalizing = false;
     }
 
 }

@@ -1,6 +1,9 @@
 ﻿@page "/TestSchedules"
 @attribute [Authorize(Roles = "Admin, Participant")]
+
 @inject ApplicationDbContext _context
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject UserManager<IdentityUser> _userManager
 
 <h3>Test Schedules</h3>
 
@@ -44,12 +47,18 @@
 @code {
     private List<QuestionSet> QuestionSets { get; set; }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task<Task> OnInitializedAsync()
     {
         QuestionSets = _context.QuestionSets
             .Where(questionSet => questionSet.StartAt != null)
             .Where(questionSet => questionSet.EndAt != null)
+            .OrderByDescending(questionSet => questionSet.StartAt)
             .ToList();
+        
+        var auth = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = _userManager.GetUserId(auth.User);
+        
+        QuestionSets.ForEach(questionSet => questionSet.UpdateStatusByUserId(userId));
 
         return base.OnInitializedAsync();
     }

@@ -3,42 +3,92 @@
 
 <h3>Answers Correction</h3>
 
-@for (var i = 0; i < Answers.Count; i++)
-{
-    var answer = Answers[i];
-
-    <div class="my-4 p-4 border rounded">
-        <p>
-            @(i + 1).
-            <span class="font-weight-bold">@answer.Question.Body</span>
-        </p>
-
-        @switch (answer.Question.Type)
-        {
-            case "Essay":
-                <div class="form-group">
-                    <textarea disabled class="form-control" rows="7">@answer.StringAnswer</textarea>
-                </div>
-                break;
-
-            case "Submit File":
-                <ViewFileInfo FilePath="@answer.StringAnswer"/>
-                break;
-        }
-
-        <div>
-            <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">
-                @(answer.IsCorrect == true ? "✔" : "") Mark answer as correct
-            </button>
-            <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">
-                @(answer.IsCorrect == false ? "✔" : "") Mark answer as incorrect
-            </button>
-        </div>
+<header class="row">
+    <div class="col">
+        <h4>Pending Correction Answers</h4>
     </div>
-}
+    <div class="col">
+        <h4>Corrected Answers</h4>
+    </div>
+</header>
+
+<main class="row">
+    <div class="col">
+        @for (var i = 0; i < PendingCorrectionAnswers.Count; i++)
+        {
+            var answer = PendingCorrectionAnswers[i];
+
+            <div class="my-4 p-4 border rounded">
+                <p>
+                    @(i + 1).
+                    <span class="font-weight-bold">@answer.Question.Body</span>
+                </p>
+
+                @switch (answer.Question.Type)
+                {
+                    case "Essay":
+                        <div class="form-group">
+                            <textarea disabled class="form-control" rows="7">@answer.StringAnswer</textarea>
+                        </div>
+                        break;
+
+                    case "Submit File":
+                        <ViewFileInfo FilePath="@answer.StringAnswer"/>
+                        break;
+                }
+
+                <div>
+                    <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">
+                        @(answer.IsCorrect == true ? "✔" : "") Mark answer as correct
+                    </button>
+                    <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">
+                        @(answer.IsCorrect == false ? "✔" : "") Mark answer as incorrect
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col">
+        @for (var i = 0; i < CorrectedAnswers.Count; i++)
+        {
+            var answer = CorrectedAnswers[i];
+
+            <div class="my-4 p-4 border rounded">
+                <p>
+                    @(i + 1).
+                    <span class="font-weight-bold">@answer.Question.Body</span>
+                </p>
+
+                @switch (answer.Question.Type)
+                {
+                    case "Essay":
+                        <div class="form-group">
+                            <textarea disabled class="form-control" rows="7">@answer.StringAnswer</textarea>
+                        </div>
+                        break;
+
+                    case "Submit File":
+                        <ViewFileInfo FilePath="@answer.StringAnswer"/>
+                        break;
+                }
+
+                <div>
+                    <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">
+                        @(answer.IsCorrect == true ? "✔" : "") Mark answer as correct
+                    </button>
+                    <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">
+                        @(answer.IsCorrect == false ? "✔" : "") Mark answer as incorrect
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</main>
 
 @code {
     private List<Answer> Answers { get; set; } = new();
+    private List<Answer> CorrectedAnswers => Answers.Where(answer => answer.IsCorrect != null).ToList();
+    private List<Answer> PendingCorrectionAnswers => Answers.Where(answer => answer.IsCorrect == null).ToList();
 
     protected override Task OnInitializedAsync()
     {
@@ -46,6 +96,7 @@
             .Include(answer => answer.Question)
             .Where(answer => new[] {"Essay", "Submit File"}.Contains(answer.Question.Type))
             .Where(answer => answer.StringAnswer != null)
+            .OrderByDescending(answer => answer.Question.Id)
             .ToList();
 
         return base.OnInitializedAsync();

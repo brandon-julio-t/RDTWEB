@@ -10,6 +10,7 @@ namespace RDTWEB.Models
         public bool? BooleanAnswer { get; set; }
         public int? ChosenIndex { get; set; }
         public bool? IsCorrect { get; set; }
+        public bool IsFinalized { get; set; }
         public string UserId { get; set; }
         public virtual IdentityUser User { get; set; }
         public int QuestionId { get; set; }

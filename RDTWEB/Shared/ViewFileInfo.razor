@@ -10,19 +10,19 @@
     <div class="table-responsive">
         <table class="table table-hover" style="color: inherit;">
             <tbody>
-            <tr>
+            <tr style="color: inherit;">
                 <th>Name</th>
                 <td>@fileInfo.Name</td>
             </tr>
-            <tr>
+            <tr style="color: inherit;">
                 <th>Size</th>
-                <td>@fileInfo.Length.ToString("n") Bytes</td>
+                <td>@fileInfo.Length.ToString("n0") Bytes</td>
             </tr>
-            <tr>
+            <tr style="color: inherit;">
                 <th>Last Modified At</th>
                 <td>@fileInfo.LastWriteTime</td>
             </tr>
-            <tr>
+            <tr style="color: inherit;">
                 <td colspan="2">
                     <a href="@FilePath" target="_blank" class="btn btn-primary">Download</a>
                 </td>

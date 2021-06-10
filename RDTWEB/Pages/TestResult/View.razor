@@ -19,8 +19,16 @@
             <td>@CorrectAnswers</td>
         </tr>
         <tr>
+            <th>Pending Corrections</th>
+            <td>@PendingCorrections</td>
+        </tr>
+        <tr>
             <th>Total Questions</th>
             <td>@QuestionSet.Questions.Count</td>
+        </tr>
+        <tr>
+            <th>Final Score</th>
+            <td>@(Math.Ceiling((double) CorrectAnswers / QuestionSet.Questions.Count * 100))</td>
         </tr>
         </tbody>
     </table>
@@ -29,7 +37,7 @@
 <section>
     @foreach (var question in QuestionSet.Questions)
     {
-        <div class="my-4 p-4 border rounded @(question.Answer.IsCorrect == null ? "" : question.Answer.IsCorrect == true ? "bg-success text-white" : "bg-danger text-white")">
+        <div class="my-4 p-4 border rounded @(question.Answer.IsCorrect switch { null => "", true => "bg-success text-white", _ => "bg-danger text-white" })">
             <p class="font-weight-bold">@question.Body</p>
 
             @switch (question.Type)
@@ -83,6 +91,7 @@
 
     private QuestionSet QuestionSet { get; set; }
     private int CorrectAnswers { get; set; }
+    private int PendingCorrections { get; set; }
 
     protected override async Task<Task> OnInitializedAsync()
     {
@@ -90,14 +99,20 @@
         var userId = _userManager.GetUserId(auth.User);
 
         QuestionSet = _context.QuestionSets
-            .Include(questionSet => questionSet.Questions.OrderBy(question => question.Id))
+            .Include(questionSet => questionSet.Questions.OrderByDescending(question => question.Id))
             .ThenInclude(question => question.Answers)
             .AsSplitQuery()
             .Single(questionSet => questionSet.Id.ToString() == Id);
 
         QuestionSet.Questions.ForEach(question =>
         {
-            question.Answer = question.Answers.Single(answer => answer.UserId == userId);
+            question.Answer = question.Answers.SingleOrDefault(answer => answer.UserId == userId);
+
+            if (question.Answer == null)
+            {
+                question.Answer = new Answer {IsCorrect = false};
+                return;
+            }
 
             switch (question.Type)
             {
@@ -116,10 +131,12 @@
 
                 case "Essay":
                 case "Submit File":
-                    if (question.Answer.IsCorrect == true)
+                    if (question.Answer.IsCorrect == null)
                     {
-                        CorrectAnswers++;
+                        PendingCorrections++;
                     }
+
+                    CorrectAnswers += question.Answer.IsCorrect == true ? 1 : 0;
                     break;
             }
         });

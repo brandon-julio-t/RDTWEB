@@ -1,0 +1,79 @@
+﻿@using System.IO
+@using Microsoft.AspNetCore.Hosting
+
+@inject ApplicationDbContext _context
+@inject IWebHostEnvironment _env
+
+<div>
+    @if (!Answer.IsFinalized)
+    {
+        <div class="form-group">
+            <InputFile OnChange="e => SaveFile(Answer, e.File)" class="form-control-file"/>
+            <small>Max size: @(MaxSize.ToString("n0")) Bytes</small>
+        </div>
+    }
+
+    @if (IsUploading)
+    {
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public Answer Answer { get; set; }
+
+    [Parameter]
+    public EventCallback OnUploaded { get; set; }
+
+    private bool IsUploading { get; set; }
+    private int MaxSize { get; set; } = 512000000;
+
+    private async Task SaveFile(Answer answer, IBrowserFile browserFile)
+    {
+        IsUploading = true;
+
+        var previousPath = answer.StringAnswer;
+
+        var name = browserFile.Name;
+        var extension = name[name.LastIndexOf(".", StringComparison.Ordinal)..];
+
+        var path = Path.Combine("Storage", "Answers", Path.GetRandomFileName() + extension);
+        await using (var file = File.Create(path))
+        {
+            file.Seek(0, SeekOrigin.Begin);
+            await browserFile.OpenReadStream(MaxSize).CopyToAsync(file);
+        }
+
+        answer.StringAnswer = path;
+        SaveOrUpdateAnswer(answer);
+
+        IsUploading = false;
+        await OnUploaded.InvokeAsync();
+
+        if (string.IsNullOrWhiteSpace(previousPath))
+            return;
+
+        var absolutePath = Path.Combine(_env.ContentRootPath, previousPath);
+        File.Delete(absolutePath);
+    }
+
+    private void SaveOrUpdateAnswer(Answer answer)
+    {
+        try
+        {
+            _context.Add(answer);
+            _context.SaveChanges();
+        }
+        catch (Exception)
+        {
+    // Entity exists, update it instead.
+            _context.Update(answer);
+            _context.SaveChanges();
+        }
+    }
+
+}

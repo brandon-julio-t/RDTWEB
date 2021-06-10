@@ -1,4 +1,5 @@
 ﻿@page "/TestResults"
+@using Castle.Core.Internal
 @attribute [Authorize(Roles = "Admin, Participant")]
 
 @inject ApplicationDbContext _context
@@ -36,23 +37,24 @@
 </div>
 
 @code {
-    private List<QuestionSet> QuestionSets { get; set; }
+    private List<QuestionSet> QuestionSets { get; set; } = new();
 
     protected override async Task<Task> OnInitializedAsync()
     {
         var auth = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userId = _userManager.GetUserId(auth.User);
 
-        const string sql = @"
-            select distinct qs.*
-            from Answers a
-                join Questions q on a.QuestionId = q.Id
-                join QuestionSets qs on q.QuestionSetId = qs.Id
-            where a.UserId = {0}";
-
         QuestionSets = _context.QuestionSets
-            .FromSqlRaw(sql, userId)
+            .Include(questionSet => questionSet.Questions)
+            .ThenInclude(question => question.Answers.Where(answer => answer.IsFinalized && answer.UserId == userId))
+            .Where(questionSet => questionSet.Questions.All(question => question.Answers.Count > 0))
+            .Distinct()
+            .OrderByDescending(questionSet => questionSet.StartAt)
+            .AsSplitQuery()
             .ToList();
+
+        QuestionSets.ForEach(questionSet => questionSet.UpdateStatusByUserId(userId));
+        QuestionSets = QuestionSets.Where(questionSet => questionSet.Status == "Finalized").ToList();
 
         return base.OnInitializedAsync();
     }
