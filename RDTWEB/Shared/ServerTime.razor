@@ -1,13 +1,12 @@
 ﻿<p>Server Time: @CurrentTime</p>
 
 @code {
-    private DateTime CurrentTime { get; set; }
 
-    protected override void OnInitialized()
+    private DateTime CurrentTime { get; set; } = DateTime.Now;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
-
-        InvokeAsync(async () =>
+        await InvokeAsync(async () =>
         {
             try
             {

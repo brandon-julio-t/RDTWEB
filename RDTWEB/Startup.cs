@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MudBlazor.Services;
 using RDTWEB.Areas.Identity;
 using RDTWEB.Models;
 
@@ -43,6 +44,7 @@ namespace RDTWEB
                 .AddScoped<AuthenticationStateProvider,
                     RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddMudServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
