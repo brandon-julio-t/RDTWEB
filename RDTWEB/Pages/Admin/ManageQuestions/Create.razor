@@ -13,7 +13,7 @@
 }
 
 <Virtualize Items="QuestionSet.Questions">
-    <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" IsEditing="true" IsNew="true"/>
+    <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" IsEditing="true" IsNew="true" OnRemove="@(question => QuestionSet.Questions.Remove(question))"/>
 </Virtualize>
 
 <MudGrid>

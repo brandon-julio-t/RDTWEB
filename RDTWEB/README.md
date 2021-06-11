@@ -31,7 +31,7 @@
  > [x] use Blazor for making the web application
 	
  > [x] make a mock data for the question, user, and schedule
- > [ ] make a documentation for the application you made / video documentation
+ > [x] make a documentation for the application you made / video documentation
 
  > [x] Please concern with the efficiency of the application regarding memory, server load, easy to use, and access time.
   describe the efficiency in the documentation

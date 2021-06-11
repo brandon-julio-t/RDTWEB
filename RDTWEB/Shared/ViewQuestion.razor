@@ -57,7 +57,13 @@
                 break;
         }
 
-        @if (!IsNew)
+        @if (IsNew)
+        {
+            <MudButton OnClick="async () => await OnRemove.InvokeAsync(Question)" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete">
+                Remove
+            </MudButton>
+        }
+        else
         {
             <MudGrid>
                 <MudItem>
@@ -139,6 +145,9 @@
 
     [Parameter]
     public EventCallback<Question> OnDelete { get; set; }
+
+    [Parameter]
+    public EventCallback<Question> OnRemove { get; set; }
 
     private void ChangeQuestionType(Question question, string type)
     {
