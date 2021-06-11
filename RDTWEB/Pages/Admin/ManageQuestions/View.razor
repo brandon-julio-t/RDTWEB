@@ -14,11 +14,14 @@ else
 }
 
 <section>
-    @for (var i = 0; i < QuestionSet.Questions.Count; i++)
-    {
-        var question = QuestionSet.Questions[i];
-        <ViewQuestion Question="@question" Number="i + 1" OnDelete="OnQuestionDeleted"/>
+    @{
+        var n = 0;
+        var lim = QuestionSet.Questions.Count;
     }
+
+    <Virtualize Items="QuestionSet.Questions">
+        <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" OnDelete="OnQuestionDeleted"/>
+    </Virtualize>
 </section>
 
 @if (IsUpdateSuccess)
@@ -55,7 +58,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         QuestionSet = await _context.QuestionSets
-            .Include(questionSet => questionSet.Questions)
+            .Include(questionSet => questionSet.Questions.OrderBy(question => question.Id))
             .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
     }
 

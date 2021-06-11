@@ -11,11 +11,14 @@
 
     <hr/>
 
-    @for (var i = 0; i < QuestionSet.Questions.Count; i++)
-    {
-        var question = QuestionSet.Questions[i];
-        <ViewQuestion Question="question" Number="i + 1" IsEditing="true" IsNew="true"/>
+    @{
+        var n = 0;
+        var lim = QuestionSet.Questions.Count;
     }
+
+    <Virtualize Items="QuestionSet.Questions">
+        <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" IsEditing="true" IsNew="true"/>
+    </Virtualize>
 </section>
 
 @if (IsSuccess)

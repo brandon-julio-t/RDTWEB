@@ -15,74 +15,78 @@
 
 <main class="row">
     <div class="col">
-        @for (var i = 0; i < PendingCorrectionAnswers.Count; i++)
-        {
-            var answer = PendingCorrectionAnswers[i];
+        @{
+            var n1 = 0;
+            var lim1 = PendingCorrectionAnswers.Count;
+        }
 
+        <Virtualize Items="PendingCorrectionAnswers">
             <div class="my-4 p-4 border rounded">
                 <p>
-                    @(i + 1).
-                    <span class="font-weight-bold">@answer.Question.Body</span>
+                    @(n1++ % lim1 + 1).
+                    <span class="font-weight-bold">@context.Question.Body</span>
                 </p>
 
-                @switch (answer.Question.Type)
+                @switch (context.Question.Type)
                 {
                     case "Essay":
                         <div class="form-group">
-                            <textarea disabled class="form-control" rows="7">@answer.StringAnswer</textarea>
+                            <textarea disabled class="form-control" rows="7">@context.StringAnswer</textarea>
                         </div>
                         break;
 
                     case "Submit File":
-                        <ViewFileInfo FilePath="@answer.StringAnswer"/>
+                        <ViewFileInfo FilePath="@context.StringAnswer"/>
                         break;
                 }
 
                 <div>
-                    <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">
-                        @(answer.IsCorrect == true ? "✔" : "") Mark answer as correct
+                    <button @onclick="() => CorrectAnswer(context, true)" class="btn btn-success">
+                        @(context.IsCorrect == true ? "✔" : "") Mark answer as correct
                     </button>
-                    <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">
-                        @(answer.IsCorrect == false ? "✔" : "") Mark answer as incorrect
+                    <button @onclick="() => CorrectAnswer(context, false)" class="btn btn-danger">
+                        @(context.IsCorrect == false ? "✔" : "") Mark answer as incorrect
                     </button>
                 </div>
             </div>
-        }
+        </Virtualize>
     </div>
     <div class="col">
-        @for (var i = 0; i < CorrectedAnswers.Count; i++)
-        {
-            var answer = CorrectedAnswers[i];
+        @{
+            var n2 = 0;
+            var lim2 = CorrectedAnswers.Count;
+        }
 
+        <Virtualize Items="CorrectedAnswers">
             <div class="my-4 p-4 border rounded">
                 <p>
-                    @(i + 1).
-                    <span class="font-weight-bold">@answer.Question.Body</span>
+                    @(n2++ % lim2 + 1).
+                    <span class="font-weight-bold">@context.Question.Body</span>
                 </p>
 
-                @switch (answer.Question.Type)
+                @switch (context.Question.Type)
                 {
                     case "Essay":
                         <div class="form-group">
-                            <textarea disabled class="form-control" rows="7">@answer.StringAnswer</textarea>
+                            <textarea disabled class="form-control" rows="7">@context.StringAnswer</textarea>
                         </div>
                         break;
 
                     case "Submit File":
-                        <ViewFileInfo FilePath="@answer.StringAnswer"/>
+                        <ViewFileInfo FilePath="@context.StringAnswer"/>
                         break;
                 }
 
                 <div>
-                    <button @onclick="() => CorrectAnswer(answer, true)" class="btn btn-success">
-                        @(answer.IsCorrect == true ? "✔" : "") Mark answer as correct
+                    <button @onclick="() => CorrectAnswer(context, true)" class="btn btn-success">
+                        @(context.IsCorrect == true ? "✔" : "") Mark answer as correct
                     </button>
-                    <button @onclick="() => CorrectAnswer(answer, false)" class="btn btn-danger">
-                        @(answer.IsCorrect == false ? "✔" : "") Mark answer as incorrect
+                    <button @onclick="() => CorrectAnswer(context, false)" class="btn btn-danger">
+                        @(context.IsCorrect == false ? "✔" : "") Mark answer as incorrect
                     </button>
                 </div>
             </div>
-        }
+        </Virtualize>
     </div>
 </main>
 
