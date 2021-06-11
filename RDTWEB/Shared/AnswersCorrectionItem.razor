@@ -1,0 +1,57 @@
+﻿@inject ApplicationDbContext _context
+
+<MudPaper Class="my-4 p-4">
+    <MudText Class="mb-4" Typo="Typo.body1">
+        @Number.
+        <span class="font-weight-bold">@Answer.Question.Body</span>
+    </MudText>
+
+    @switch (Answer.Question.Type)
+    {
+        case "Essay":
+            <div class="form-group">
+                <textarea disabled class="form-control" rows="7">@Answer.StringAnswer</textarea>
+            </div>
+            break;
+
+        case "Submit File":
+            <ViewFileInfo FilePath="@Answer.StringAnswer"/>
+            break;
+    }
+
+    <MudGrid Class="mt-4">
+        <MudItem>
+            <MudButton OnClick="() => CorrectAnswer(Answer, true)" Variant="Variant.Filled" Color="Color.Success" StartIcon="@(Answer.IsCorrect == true ? Icons.Material.Filled.Done : null)">
+                Mark answer as correct
+            </MudButton>
+        </MudItem>
+        <MudItem>
+            <MudButton OnClick="() => CorrectAnswer(Answer, false)" Variant="Variant.Filled" Color="Color.Error" StartIcon="@(Answer.IsCorrect == false ? Icons.Material.Filled.Done : null)">
+                Mark answer as incorrect
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+
+@code {
+
+    [Parameter]
+    public Answer Answer { get; set; }
+
+    [Parameter]
+    public int Number { get; set; }
+
+    [Parameter]
+    public EventCallback OnCorrected { get; set; }
+
+    private async Task CorrectAnswer(Answer answer, bool isCorrect)
+    {
+        answer.IsCorrect = isCorrect;
+        _context.Update(answer);
+        await _context.SaveChangesAsync();
+        StateHasChanged();
+        await OnCorrected.InvokeAsync();
+    }
+
+}

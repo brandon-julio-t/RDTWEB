@@ -8,88 +8,79 @@
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject UserManager<IdentityUser> _userManager
 
-<h3>@QuestionSet.Title</h3>
+<MudText Class="mb-4" Typo="Typo.h3">@QuestionSet.Title</MudText>
 
-<section class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <tbody>
-        <tr>
-            <th>Correct Answers</th>
-            <td>@CorrectAnswers</td>
-        </tr>
-        <tr>
-            <th>Pending Corrections</th>
-            <td>@PendingCorrections</td>
-        </tr>
-        <tr>
-            <th>Total Questions</th>
-            <td>@QuestionSet.Questions.Count</td>
-        </tr>
-        <tr>
-            <th>Final Score</th>
-            <td>@(Math.Ceiling((double) CorrectAnswers / QuestionSet.Questions.Count * 100))</td>
-        </tr>
-        </tbody>
-    </table>
-</section>
+<MudSimpleTable Class="my-4" Hover="true" Striped="true">
+    <tbody>
+    <tr>
+        <th>Correct Answers</th>
+        <td>@CorrectAnswers</td>
+    </tr>
+    <tr>
+        <th>Pending Corrections</th>
+        <td>@PendingCorrections</td>
+    </tr>
+    <tr>
+        <th>Total Questions</th>
+        <td>@QuestionSet.Questions.Count</td>
+    </tr>
+    <tr>
+        <th>Final Score</th>
+        <td>@(Math.Ceiling((double) CorrectAnswers / QuestionSet.Questions.Count * 100))</td>
+    </tr>
+    </tbody>
+</MudSimpleTable>
 
-<section>
-    <Virtualize Items="QuestionSet.Questions">
-        <ItemContent>
-            <div class="my-4 p-4 border rounded @(context.Answer.IsCorrect switch { null => "", true => "bg-success text-white", _ => "bg-danger text-white" })">
-                <p class="font-weight-bold">@context.Body</p>
+<Virtualize Items="QuestionSet.Questions">
+    <MudPaper Class="my-4 p-4" Style="@(context.Answer.IsCorrect switch { null => "", true => $"color:{Colors.Shades.White};background-color:{Colors.Green.Default};", _ => $"color:{Colors.Shades.White};background-color:{Colors.Red.Default};" })">
+        <MudText Class="mb-4" Typo="Typo.body1">
+            <b>@context.Body</b>
+        </MudText>
 
-                @switch (context.Type)
+        @switch (context.Type)
+        {
+            case "Multiple Choice":
+            case "Multiple Answer List":
+                @for (var i = 0; i < context.Choices.Count; i++)
                 {
-                    case "Multiple Choice":
-                    case "Multiple Answer List":
-                        @for (var i = 0; i < context.Choices.Count; i++)
-                        {
-                            var idx = i;
+                    var idx = i;
 
-                            <div class="form-group form-inline">
-                                <input disabled checked="@(context.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
-                                <input disabled value="@context.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
-                            </div>
-                        }
-                        break;
-
-                    case "Boolean (true or false)":
-                        <div class="form-group">
-                            <div class="form-check form-check-inline">
-                                <input disabled checked="@context.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
-                                <label class="form-check-label" for="true">True</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input disabled checked="@(!context.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
-                                <label class="form-check-label" for="false">False</label>
-                            </div>
-                        </div>
-                        break;
-
-                    case "Essay":
-                        <div class="form-group">
-                            <textarea disabled class="form-control" rows="7">@context.Answer.StringAnswer</textarea>
-                        </div>
-                        break;
-
-                    case "Submit File":
-                        <ViewFileInfo FilePath="@context.Answer.StringAnswer"/>
-                        break;
+                    <div class="form-group form-inline">
+                        <input disabled checked="@(context.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                        <input disabled value="@context.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
+                    </div>
                 }
-            </div>
-        </ItemContent>
-        <Placeholder>
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-            </div>
-        </Placeholder>
-    </Virtualize>
-</section>
+                break;
 
-<NavLink href="TestResults" class="btn btn-secondary">Back</NavLink>
+            case "Boolean (true or false)":
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input disabled checked="@context.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                        <label class="form-check-label" for="true">True</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input disabled checked="@(!context.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                        <label class="form-check-label" for="false">False</label>
+                    </div>
+                </div>
+                break;
+
+            case "Essay":
+                <div class="form-group">
+                    <textarea disabled class="form-control" rows="7">@context.Answer.StringAnswer</textarea>
+                </div>
+                break;
+
+            case "Submit File":
+                <ViewFileInfo FilePath="@context.Answer.StringAnswer"/>
+                break;
+        }
+    </MudPaper>
+</Virtualize>
+
+<MudButton Link="TestResults" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack">
+    Back
+</MudButton>
 
 @code {
 

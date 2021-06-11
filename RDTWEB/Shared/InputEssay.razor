@@ -2,23 +2,24 @@
 
 @if (Answer.IsFinalized)
 {
-    <div class="form-group">
-        <textarea disabled class="form-control" rows="7"></textarea>
-    </div>
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTextField T="string" Label="Essay" Text="@Answer.StringAnswer" Variant="Variant.Outlined" Lines="7" Disabled="true"/>
+        </MudItem>
+    </MudGrid>
 }
 else
 {
-    <div class="form-group">
-        <textarea @bind="Answer.StringAnswer" class="form-control" rows="7"></textarea>
-    </div>
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTextField T="string" Label="Essay" @bind-Value="Answer.StringAnswer" Variant="Variant.Outlined" Lines="7" DebounceInterval="500" OnDebounceIntervalElapsed="SaveOrUpdateAnswer" Disabled="IsSaving"/>
+        </MudItem>
+    </MudGrid>
 
-    <button @onclick="() => SaveOrUpdateAnswer(Answer)" disabled="@IsSaving" class="btn btn-primary">
-        @if (IsSaving)
-        {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        }
-        Save
-    </button>
+    @if (IsSaving)
+    {
+        <MudText Class="mt-4">Saving...</MudText>
+    }
 }
 
 
@@ -29,19 +30,19 @@ else
 
     private bool IsSaving { get; set; }
 
-    private void SaveOrUpdateAnswer(Answer answer)
+    private void SaveOrUpdateAnswer()
     {
         IsSaving = true;
 
         try
         {
-            _context.Add(answer);
+            _context.Add(Answer);
             _context.SaveChanges();
         }
         catch (Exception)
         {
     // Entity exists, update it instead.
-            _context.Update(answer);
+            _context.Update(Answer);
             _context.SaveChanges();
         }
 

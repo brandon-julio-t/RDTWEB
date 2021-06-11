@@ -6,48 +6,34 @@
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject UserManager<IdentityUser> _userManager
 
-<h3>Test Result</h3>
+<MudText Class="mb-4" Typo="Typo.h3">Test Result</MudText>
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Start At</th>
-            <th>End At</th>
-            <th>Status</th>
-            <th>Actions</th>
+<MudSimpleTable Hover="true" Striped="true">
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Start At</th>
+        <th>End At</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <Virtualize Items="QuestionSets">
+        <tr class="@GetTrClassByStatus(context)">
+            <td class="align-middle">@context.Title</td>
+            <td class="align-middle">@context.StartAt?.ToString("U")</td>
+            <td class="align-middle">@context.EndAt?.ToString("U")</td>
+            <td class="align-middle">@context.Status</td>
+            <td class="align-middle">
+                <MudButton Link="@($"/TestResults/{context.Id}")" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Details">
+                    View Result
+                </MudButton>
+            </td>
         </tr>
-        </thead>
-        <tbody>
-        <Virtualize Items="QuestionSets">
-            <ItemContent>
-                <tr class="@GetTrClassByStatus(context)">
-                    <td class="align-middle">@context.Title</td>
-                    <td class="align-middle">@context.StartAt?.ToString("U")</td>
-                    <td class="align-middle">@context.EndAt?.ToString("U")</td>
-                    <td class="align-middle">@context.Status</td>
-                    <td class="align-middle">
-                        <NavLink href="@($"/TestResults/{context.Id}")" class="btn btn-primary">View Result</NavLink>
-                    </td>
-                </tr>
-
-            </ItemContent>
-            <Placeholder>
-                <tr>
-                    <td colspan="5">
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </Placeholder>
-        </Virtualize>
-        </tbody>
-    </table>
-</div>
+    </Virtualize>
+    </tbody>
+</MudSimpleTable>
 
 @code {
 

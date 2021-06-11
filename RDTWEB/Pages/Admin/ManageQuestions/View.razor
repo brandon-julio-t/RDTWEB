@@ -1,50 +1,59 @@
 ﻿@page "/ManageQuestions/{id?}"
 @attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext _context
+@inject ISnackbar _snackbar
 
 @if (IsEditing)
 {
-    <div class="form-group">
-        <input @bind-value="@QuestionSet.Title" class="form-control"/>
-    </div>
+    <MudTextField @bind-Value="QuestionSet.Title" Label="Question Set Title" Variant="Variant.Text" FullWidth="true"/>
 }
 else
 {
-    <h3>@QuestionSet.Title</h3>
+    <MudText Class="mb-4" Typo="Typo.h3">@QuestionSet.Title</MudText>
 }
 
-<section>
-    @{
-        var n = 0;
-        var lim = QuestionSet.Questions.Count;
+@{
+    var n = 0;
+    var lim = QuestionSet.Questions.Count;
+}
+
+<Virtualize Items="QuestionSet.Questions">
+    <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" OnDelete="OnQuestionDeleted"/>
+</Virtualize>
+
+<MudGrid>
+    @if (IsEditing)
+    {
+        <MudItem>
+            <MudButton OnClick="AddQuestion" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
+                Add Question
+            </MudButton>
+        </MudItem>
+        <MudItem>
+            <MudButton OnClick="UpdateQuestionSet" Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">
+                Save
+            </MudButton>
+        </MudItem>
+        <MudItem>
+            <MudButton OnClick="() => IsEditing = false" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Cancel">
+                Cancel
+            </MudButton>
+        </MudItem>
     }
-
-    <Virtualize Items="QuestionSet.Questions">
-        <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" OnDelete="OnQuestionDeleted"/>
-    </Virtualize>
-</section>
-
-@if (IsUpdateSuccess)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Update Success.
-        <button @onclick="() => IsUpdateSuccess = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-}
-
-@if (IsEditing)
-{
-    <button @onclick="AddQuestion" class="btn btn-primary">Add Question</button>
-    <button @onclick="UpdateQuestionSet" class="btn btn-success">Save</button>
-    <button @onclick="() => IsEditing = false" class="btn btn-danger">Cancel</button>
-}
-else
-{
-    <button @onclick="() => IsEditing = true" class="btn btn-primary">Edit</button>
-    <NavLink href="ManageQuestions" class="btn btn-secondary">Back</NavLink>
-}
+    else
+    {
+        <MudItem>
+            <MudButton OnClick="() => IsEditing = true" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit">
+                Edit
+            </MudButton>
+        </MudItem>
+        <MudItem>
+            <MudButton Link="ManageQuestions" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack">
+                Back
+            </MudButton>
+        </MudItem>
+    }
+</MudGrid>
 
 @code {
 
@@ -53,7 +62,6 @@ else
 
     private QuestionSet QuestionSet { get; set; } = new();
     private bool IsEditing { get; set; }
-    private bool IsUpdateSuccess { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -77,9 +85,10 @@ else
         _context.Update(QuestionSet);
         await _context.SaveChangesAsync();
 
-        IsUpdateSuccess = true;
         IsEditing = false;
         StateHasChanged();
+
+        _snackbar.Add("Update success.", Severity.Success);
     }
 
 }

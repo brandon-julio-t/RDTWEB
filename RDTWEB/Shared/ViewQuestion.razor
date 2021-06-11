@@ -1,21 +1,17 @@
 ﻿@inject ApplicationDbContext _context
 
-<div class="my-4 p-4 border rounded">
+<MudPaper Class="my-4 p-4">
     @if (IsEditing)
     {
-        <div class="form-group">
-            <input @bind-value="@Question.Body" type="text" class="form-control" placeholder="Question Body"/>
-        </div>
+        <MudTextField Class="my-4" @bind-Value="Question.Body" Variant="Variant.Text" Label="Question Body" FullWidth="true"/>
 
-        <div class="form-group">
-            <select @onchange="e => ChangeQuestionType(Question, e.Value?.ToString())" type="text" class="form-control" placeholder="Question Body">
-                <option selected='@(Question.Type == "Multiple Choice")'>Multiple Choice</option>
-                <option selected='@(Question.Type == "Boolean (true or false)")'>Boolean (true or false)</option>
-                <option selected='@(Question.Type == "Multiple Answer List")'>Multiple Answer List</option>
-                <option selected='@(Question.Type == "Essay")'>Essay</option>
-                <option selected='@(Question.Type == "Submit File")'>Submit File</option>
-            </select>
-        </div>
+        <MudSelect Class="my-4" T="string" ValueChanged="e => ChangeQuestionType(Question, e)" Label="Question Type" SelectedValues="@(new HashSet<string> {Question.Type})" FullWidth="true">
+            <MudSelectItem Value="@("Multiple Choice")"/>
+            <MudSelectItem Value="@("Boolean (true or false)")"/>
+            <MudSelectItem Value="@("Multiple Answer List")"/>
+            <MudSelectItem Value="@("Essay")"/>
+            <MudSelectItem Value="@("Submit File")"/>
+        </MudSelect>
 
         @switch (Question.Type)
         {
@@ -55,21 +51,31 @@
                     </div>
                 }
 
-                <div class="form-group">
-                    <button @onclick='() => Question.Choices.Add("")' class="btn btn-outline-secondary">Add Answer</button>
-                </div>
+                <MudButton OnClick='() => Question.Choices.Add("")' Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add">
+                    Add Answer
+                </MudButton>
                 break;
         }
 
         @if (!IsNew)
         {
-            <button @onclick="OnEditingDone" class="btn btn-success">Done</button>
-            <button @onclick="() => IsEditing = false" class="btn btn-danger">Cancel</button>
+            <MudGrid>
+                <MudItem>
+                    <MudButton OnClick="OnEditingDone" Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Done">
+                        Done
+                    </MudButton>
+                </MudItem>
+                <MudItem>
+                    <MudButton OnClick="() => IsEditing = false" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Cancel">
+                        Cancel
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
         }
     }
     else
     {
-        <p class="font-weight-bold">@Number. @Question.Body [@Question.Type]</p>
+        <MudText Class="mb-4" Typo="Typo.body1">@Number. @Question.Body [@Question.Type]</MudText>
 
         @switch (Question.Type)
         {
@@ -101,13 +107,21 @@
 
         @if (!IsNew)
         {
-            <div class="btn-group" role="group" aria-label="Actions">
-                <button @onclick="() => IsEditing = true" class="btn btn-secondary">Edit</button>
-                <button @onclick="DeleteQuestion" class="btn btn-danger">Delete</button>
-            </div>
+            <MudGrid Class="mt-4">
+                <MudItem>
+                    <MudButton OnClick="() => IsEditing = true" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit">
+                        Edit
+                    </MudButton>
+                </MudItem>
+                <MudItem>
+                    <MudButton OnClick="DeleteQuestion" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete">
+                        Delete
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
         }
     }
-</div>
+</MudPaper>
 
 @code {
 

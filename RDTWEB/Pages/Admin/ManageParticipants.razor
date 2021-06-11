@@ -1,17 +1,19 @@
 ﻿@page "/ManageParticipants"
 @using Microsoft.Extensions.Configuration
+@using InputType = MudBlazor.InputType
 
 @attribute [Authorize(Roles = "Admin")]
 
 @inject UserManager<IdentityUser> _userManager
 @inject IConfiguration _config
+@inject ISnackbar _snackbar
 
-<main class="row">
-    <section class="col-7 pr-2">
-        <h3>Participants</h3>
+<MudGrid>
+    <MudItem xs="7">
+        <MudPaper Class="p-4">
+            <MudText Class="mb-4" Typo="Typo.h3">Participants</MudText>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
+            <MudSimpleTable Hover="true" Striped="true">
                 <thead>
                 <tr>
                     <th>ID</th>
@@ -21,76 +23,42 @@
                 </thead>
                 <tbody>
                 <Virtualize Items="Users">
-                    <ItemContent>
-                        <tr>
-                            <td class="align-middle">@context.Id</td>
-                            <td class="align-middle">@context.Email</td>
-                            <td class="align-middle">
-                                <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(context)">Delete</button>
-                            </td>
-                        </tr>
-                    </ItemContent>
-                    <Placeholder>
-                        <tr>
-                            <td colspan="3">
-                                <div class="d-flex justify-content-center">
-                                    <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    </Placeholder>
+                    <tr>
+                        <td class="align-middle">@context.Id</td>
+                        <td class="align-middle">@context.Email</td>
+                        <td class="align-middle">
+                            <MudButton OnClick="() => DeleteUser(context)" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete">
+                                Delete
+                            </MudButton>
+                        </td>
+                    </tr>
                 </Virtualize>
                 </tbody>
-            </table>
-        </div>
-    </section>
+            </MudSimpleTable>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="5">
+        <MudPaper Class="p-4">
+            <div style="position: sticky; top: 73px;">
+                <MudText Class="mb-4" Typo="Typo.h3">Create Participants</MudText>
 
-    <section class="col-4 pl-2">
-        <div style="position: sticky; top: 73px;">
-            <h3>Create Participants</h3>
+                <EditForm Model="@FormModel" OnSubmit="@CreateUser">
+                    <MudTextField @bind-Value="FormModel.Username" Class="mb-4" Variant="Variant.Text" Label="Email" InputType="InputType.Email" FullWidth="true"></MudTextField>
 
-            @if (IsSuccess)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    Create User Success.
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="() => IsSuccess = false">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            }
-
-            @if (IsError)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    Username must not be empty
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="() => IsError = false">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            }
-
-            <EditForm Model="@FormModel" OnSubmit="@CreateUser">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input @bind-value="FormModel.Username" type="text" class="form-control" id="username" placeholder="Username">
-                </div>
-
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </EditForm>
-
-        </div>
-    </section>
-</main>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send">
+                        Submit
+                    </MudButton>
+                </EditForm>
+            </div>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 @code {
 
     private List<IdentityUser> Users { get; set; } = new();
 
     private CreateUserForm FormModel { get; } = new();
-    private bool IsSuccess { get; set; }
-    private bool IsError { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,9 +67,10 @@
 
     private async Task CreateUser()
     {
-        if (FormModel.Username == "")
+        if (string.IsNullOrWhiteSpace(FormModel.Username))
         {
-            IsError = true;
+            _snackbar.Add("Email must be filled!", Severity.Error);
+            return;
         }
 
         var user = new IdentityUser
@@ -116,7 +85,7 @@
 
         Users.Add(user);
         FormModel.Username = "";
-        IsSuccess = true;
+        _snackbar.Add("Participant created.", Severity.Success);
         StateHasChanged();
     }
 

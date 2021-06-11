@@ -1,44 +1,42 @@
 ﻿@page "/ManageQuestions/Create"
 @attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext _context
+@inject ISnackbar _snackbar
 
-<h3>Manage Questions</h3>
+<MudText Class="mb-4" Typo="Typo.h3">Manage Questions</MudText>
 
-<section>
-    <div class="form-group">
-        <input @bind-value="@QuestionSet.Title" type="text" class="form-control" placeholder="Question Set Title"/>
-    </div>
+<MudTextField Class="my-4" @bind-Value="QuestionSet.Title" Label="Question Set Title" Variant="Variant.Text" FullWidth="true"/>
 
-    <hr/>
-
-    @{
-        var n = 0;
-        var lim = QuestionSet.Questions.Count;
-    }
-
-    <Virtualize Items="QuestionSet.Questions">
-        <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" IsEditing="true" IsNew="true"/>
-    </Virtualize>
-</section>
-
-@if (IsSuccess)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Question Set Added Successfully
-        <button @onclick="() => IsSuccess = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
+@{
+    var n = 0;
+    var lim = QuestionSet.Questions.Count;
 }
 
-<button @onclick="AddNewQuestion" class="btn btn-primary">Add Question</button>
-<button @onclick="SaveQuestionSet" class="btn btn-success">Save</button>
-<NavLink href="ManageQuestions" class="btn btn-secondary">Back</NavLink>
+<Virtualize Items="QuestionSet.Questions">
+    <ViewQuestion Question="@context" Number="@(n++ % lim + 1)" IsEditing="true" IsNew="true"/>
+</Virtualize>
+
+<MudGrid>
+    <MudItem>
+        <MudButton OnClick="AddNewQuestion" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
+            Add Question
+        </MudButton>
+    </MudItem>
+    <MudItem>
+        <MudButton OnClick="SaveQuestionSet" Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">
+            Save
+        </MudButton>
+    </MudItem>
+    <MudItem>
+        <MudButton Link="ManageQuestions" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack">
+            Back
+        </MudButton>
+    </MudItem>
+</MudGrid>
 
 @code {
 
     private QuestionSet QuestionSet { get; set; } = new();
-    private bool IsSuccess { get; set; }
 
     private void AddNewQuestion()
     {
@@ -51,8 +49,9 @@
         await _context.SaveChangesAsync();
 
         QuestionSet = new QuestionSet();
-        IsSuccess = true;
         StateHasChanged();
+
+        _snackbar.Add("Question set created.", Severity.Success);
     }
 
 }

@@ -2,93 +2,39 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject ApplicationDbContext _context
 
-<h3>Answers Correction</h3>
+<MudText Class="mb-4" Typo="Typo.h3">Answers Correction</MudText>
 
-<header class="row">
-    <div class="col">
-        <h4>Pending Correction Answers</h4>
-    </div>
-    <div class="col">
-        <h4>Corrected Answers</h4>
-    </div>
-</header>
+<MudGrid>
+    <MudItem xs="6">
+        <MudText Class="my-2" Typo="Typo.h4">Pending Correction Answers</MudText>
+    </MudItem>
+    <MudItem xs="6">
+        <MudText Class="my-2" Typo="Typo.h4">Corrected Answers</MudText>
+    </MudItem>
+</MudGrid>
 
-<main class="row">
-    <div class="col">
+<MudGrid>
+    <MudItem xs="6">
         @{
             var n1 = 0;
             var lim1 = PendingCorrectionAnswers.Count;
         }
 
         <Virtualize Items="PendingCorrectionAnswers">
-            <div class="my-4 p-4 border rounded">
-                <p>
-                    @(n1++ % lim1 + 1).
-                    <span class="font-weight-bold">@context.Question.Body</span>
-                </p>
-
-                @switch (context.Question.Type)
-                {
-                    case "Essay":
-                        <div class="form-group">
-                            <textarea disabled class="form-control" rows="7">@context.StringAnswer</textarea>
-                        </div>
-                        break;
-
-                    case "Submit File":
-                        <ViewFileInfo FilePath="@context.StringAnswer"/>
-                        break;
-                }
-
-                <div>
-                    <button @onclick="() => CorrectAnswer(context, true)" class="btn btn-success">
-                        @(context.IsCorrect == true ? "✔" : "") Mark answer as correct
-                    </button>
-                    <button @onclick="() => CorrectAnswer(context, false)" class="btn btn-danger">
-                        @(context.IsCorrect == false ? "✔" : "") Mark answer as incorrect
-                    </button>
-                </div>
-            </div>
+            <AnswersCorrectionItem Answer="@context" Number="@(n1++ % lim1 + 1)" OnCorrected="@StateHasChanged"/>
         </Virtualize>
-    </div>
-    <div class="col">
+    </MudItem>
+    <MudItem xs="6">
         @{
             var n2 = 0;
             var lim2 = CorrectedAnswers.Count;
         }
 
         <Virtualize Items="CorrectedAnswers">
-            <div class="my-4 p-4 border rounded">
-                <p>
-                    @(n2++ % lim2 + 1).
-                    <span class="font-weight-bold">@context.Question.Body</span>
-                </p>
-
-                @switch (context.Question.Type)
-                {
-                    case "Essay":
-                        <div class="form-group">
-                            <textarea disabled class="form-control" rows="7">@context.StringAnswer</textarea>
-                        </div>
-                        break;
-
-                    case "Submit File":
-                        <ViewFileInfo FilePath="@context.StringAnswer"/>
-                        break;
-                }
-
-                <div>
-                    <button @onclick="() => CorrectAnswer(context, true)" class="btn btn-success">
-                        @(context.IsCorrect == true ? "✔" : "") Mark answer as correct
-                    </button>
-                    <button @onclick="() => CorrectAnswer(context, false)" class="btn btn-danger">
-                        @(context.IsCorrect == false ? "✔" : "") Mark answer as incorrect
-                    </button>
-                </div>
-            </div>
+            <AnswersCorrectionItem Answer="@context" Number="@(n2++ % lim2 + 1)" OnCorrected="@StateHasChanged"/>
         </Virtualize>
-    </div>
-</main>
+    </MudItem>
+</MudGrid>
 
 @code {
 
@@ -104,14 +50,6 @@
             .Where(answer => answer.StringAnswer != null)
             .OrderByDescending(answer => answer.Question.Id)
             .ToListAsync();
-    }
-
-    private async Task CorrectAnswer(Answer answer, bool isCorrect)
-    {
-        _context.Update(answer);
-        await _context.SaveChangesAsync();
-        answer.IsCorrect = isCorrect;
-        StateHasChanged();
     }
 
 }

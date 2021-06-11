@@ -6,33 +6,34 @@
 {
     var fileInfo = GetFileInfo(FilePath);
 
-    <div class="table-responsive">
-        <table class="table table-hover" style="color: inherit;">
-            <tbody>
-            <tr style="color: inherit;">
-                <th>Name</th>
-                <td>@fileInfo.Name</td>
-            </tr>
-            <tr style="color: inherit;">
-                <th>Size</th>
-                <td>@fileInfo.Length.ToString("n0") Bytes</td>
-            </tr>
-            <tr style="color: inherit;">
-                <th>Last Modified At</th>
-                <td>@fileInfo.LastWriteTime</td>
-            </tr>
-            <tr style="color: inherit;">
-                <td colspan="2">
-                    <a href="@FilePath" target="_blank" class="btn btn-primary">Download</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+
+    <MudSimpleTable Hover="true" Striped="true">
+        <tbody>
+        <tr>
+            <th>Name</th>
+            <td>@fileInfo.Name</td>
+        </tr>
+        <tr>
+            <th>Size</th>
+            <td>@fileInfo.Length.ToString("n0") Bytes</td>
+        </tr>
+        <tr>
+            <th>Last Modified At</th>
+            <td>@fileInfo.LastWriteTime</td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <MudButton Link="@FilePath" Target="_blank" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileDownload">
+                    Download
+                </MudButton>
+            </td>
+        </tr>
+        </tbody>
+    </MudSimpleTable>
 }
 else
 {
-    <small>No file uploaded yet.</small>
+    <MudText Typo="Typo.subtitle1">No file uploaded yet.</MudText>
 }
 
 @code {

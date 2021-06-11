@@ -9,127 +9,121 @@
 @inject IWebHostEnvironment _env
 @inject IJSRuntime _jsRuntime
 
-<h3>Information</h3>
+<MudText Class="mb-4" Typo="Typo.h3">Information</MudText>
 
 <ServerTime/>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <tbody>
-        <tr>
-            <th>Title</th>
-            <td>@QuestionSet.Title</td>
-        </tr>
-        <tr>
-            <th>Start At</th>
-            <td>@QuestionSet.StartAt</td>
-        </tr>
-        <tr>
-            <th>End At</th>
-            <td>@QuestionSet.EndAt</td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+<MudSimpleTable Hover="true" Striped="true">
+    <tbody>
+    <tr>
+        <th>Title</th>
+        <td>@QuestionSet.Title</td>
+    </tr>
+    <tr>
+        <th>Start At</th>
+        <td>@QuestionSet.StartAt?.ToString("U")</td>
+    </tr>
+    <tr>
+        <th>End At</th>
+        <td>@QuestionSet.EndAt?.ToString("U")</td>
+    </tr>
+    </tbody>
+</MudSimpleTable>
 
-<section>
-    @{
-        var n = 0;
-        var lim = QuestionSet.Questions.Count;
-    }
+@{
+    var n = 0;
+    var lim = QuestionSet.Questions.Count;
+}
 
-    <Virtualize Items="QuestionSet.Questions">
-        <div class="my-4 p-4 border rounded">
-            <p>
-                @(n++ % lim + 1).
-                <span class="font-weight-bold">@context.Body</span>
-            </p>
+<Virtualize Items="QuestionSet.Questions">
+    <MudPaper Class="my-4 p-4">
+        <MudText Class="mb-4" Typo="Typo.body1">@(n++ % lim + 1). <b>@context.Body</b></MudText>
 
-            @switch (context.Type)
-            {
-                case "Multiple Choice":
-                case "Multiple Answer List":
-                    @for (var j = 0; j < context.Choices.Count; j++)
-                    {
-                        var idx = j;
+        @switch (context.Type)
+        {
+            case "Multiple Choice":
+            case "Multiple Answer List":
+                @for (var j = 0; j < context.Choices.Count; j++)
+                {
+                    var idx = j;
 
-                        @if (context.Answer.IsFinalized)
-                        {
-                            <div class="form-group form-inline">
-                                <input disabled checked="@(context.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
-                                <input disabled value="@context.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="form-group form-inline">
-                                <input @onchange="() => SaveIndex(context.Answer, idx)" checked="@(context.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
-                                <input disabled value="@context.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
-                            </div>
-                        }
-                    }
-                    break;
-
-                case "Boolean (true or false)":
                     @if (context.Answer.IsFinalized)
                     {
-                        <div class="form-group">
-                            <div class="form-check form-check-inline">
-                                <input disabled checked="@context.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
-                                <label class="form-check-label" for="true">True</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input disabled checked="@(!context.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
-                                <label class="form-check-label" for="false">False</label>
-                            </div>
+                        <div class="form-group form-inline">
+                            <input disabled checked="@(context.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                            <input disabled value="@context.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
                         </div>
                     }
                     else
                     {
-                        <div class="form-group">
-                            <div class="form-check form-check-inline">
-                                <input @onchange="() => SaveBoolean(context.Answer, true)" checked="@context.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
-                                <label class="form-check-label" for="true">True</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input @onchange="() => SaveBoolean(context.Answer, false)" checked="@(!context.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
-                                <label class="form-check-label" for="false">False</label>
-                            </div>
+                        <div class="form-group form-inline">
+                            <input @onchange="() => SaveIndex(context.Answer, idx)" checked="@(context.Answer.ChosenIndex == idx)" class="form-check-input" type="checkbox"/>
+                            <input disabled value="@context.Choices[idx]" type="text" class="form-control flex-fill" placeholder="Multiple Answer Choice #@(idx + 1)"/>
                         </div>
                     }
-                    break;
+                }
+                break;
 
-                case "Essay":
-                    <InputEssay Answer="@context.Answer"/>
-                    break;
+            case "Boolean (true or false)":
+                @if (context.Answer.IsFinalized)
+                {
+                    <div class="form-group">
+                        <div class="form-check form-check-inline">
+                            <input disabled checked="@context.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                            <label class="form-check-label" for="true">True</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input disabled checked="@(!context.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                            <label class="form-check-label" for="false">False</label>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        <div class="form-check form-check-inline">
+                            <input @onchange="() => SaveBoolean(context.Answer, true)" checked="@context.Answer.BooleanAnswer" class="form-check-input" type="radio" id="true">
+                            <label class="form-check-label" for="true">True</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input @onchange="() => SaveBoolean(context.Answer, false)" checked="@(!context.Answer.BooleanAnswer)" class="form-check-input" type="radio" id="false">
+                            <label class="form-check-label" for="false">False</label>
+                        </div>
+                    </div>
+                }
+                break;
 
-                case "Submit File":
-                    <InputFileUploader Answer="@context.Answer" OnUploaded="StateHasChanged"/>
-                    <ViewFileInfo FilePath="@context.Answer.StringAnswer"/>
-                    break;
-            }
-        </div>
-    </Virtualize>
-</section>
+            case "Essay":
+                <InputEssay Answer="@context.Answer"/>
+                break;
 
-@if (IsFinalized)
-{
-    <button disabled class="btn btn-success disabled">
-        Finalized
-    </button>
-}
-else
-{
-    <button @onclick="OnFinalizeAnswers" disabled="@IsFinalizing" class="btn btn-success">
-        @if (IsFinalizing)
-        {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            case "Submit File":
+                <InputFileUploader Answer="@context.Answer" OnUploaded="StateHasChanged"/>
+                <ViewFileInfo FilePath="@context.Answer.StringAnswer"/>
+                break;
         }
-        Finalize Answers
-    </button>
-}
+    </MudPaper>
+</Virtualize>
 
-<NavLink href="TestSchedules" class="btn btn-secondary">Back</NavLink>
+<MudGrid>
+    <MudItem>
+        @if (IsFinalized)
+        {
+            <MudButton Disabled="true" Variant="Variant.Filled" Color="Color.Success">Finalized</MudButton>
+        }
+        else
+        {
+            <MudButton OnClick="OnFinalizeAnswers" Disabled="@IsFinalizing" Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Done">
+                @(IsFinalizing ? "Finalizing Answers..." : "Finalize Answers")
+            </MudButton>
+        }
+    </MudItem>
+    <MudItem>
+        <MudButton Link="TestSchedules" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack">
+            Back
+        </MudButton>
+    </MudItem>
+</MudGrid>
 
 @code {
 
@@ -150,9 +144,11 @@ else
         QuestionSet = await _context.QuestionSets
             .Include(questionSet => questionSet.Questions.OrderBy(question => question.Id))
             .ThenInclude(question => question.Answers.Where(answer => answer.UserId == userId))
-            .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id);
+            .Where(questionSet => questionSet.StartAt <= DateTime.Now)
+            .Where(questionSet => questionSet.EndAt >= DateTime.Now)
+            .SingleOrDefaultAsync(questionSet => questionSet.Id.ToString() == Id) ?? new QuestionSet();
 
-        QuestionSet.Questions
+        QuestionSet?.Questions
             .ForEach(question =>
                 question.Answer = question.Answers
                     .SingleOrDefault(answer => answer.UserId == userId)

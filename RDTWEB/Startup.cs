@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MudBlazor;
 using MudBlazor.Services;
 using RDTWEB.Areas.Identity;
 using RDTWEB.Models;
@@ -44,7 +45,15 @@ namespace RDTWEB
                 .AddScoped<AuthenticationStateProvider,
                     RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddMudServices();
+            services.AddMudServices(config =>
+            {
+                config.SnackbarConfiguration.PreventDuplicates = true;
+                config.SnackbarConfiguration.VisibleStateDuration = 4000;
+                config.SnackbarConfiguration.HideTransitionDuration = 150;
+                config.SnackbarConfiguration.ShowTransitionDuration = 150;
+                config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;
+                config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

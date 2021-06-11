@@ -3,57 +3,57 @@
 <ServerTime/>
 
 <AuthorizeView Roles="Admin">
-    <h2 class="my-4">Admin</h2>
+    <MudText Class="my-4" Typo="Typo.h2">Admin</MudText>
 
-    <section class="card-deck">
-        <div class="card">
-            <div class="card-body">
-                <NavLink href="ManageParticipants" class="stretched-link d-block text-center">Manage Participants</NavLink>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <NavLink href="ManageQuestions" class="stretched-link d-block text-center">Manage Questions</NavLink>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <NavLink href="ManageSchedules" class="stretched-link d-block text-center">Manage Schedules</NavLink>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <NavLink href="AnswersCorrection" class="stretched-link d-block text-center">Answers Correction</NavLink>
-            </div>
-        </div>
-    </section>
+    <MudGrid>
+        <MudItem xs="3">
+            <MudButton Class="p-4" Link="ManageParticipants" Variant="Variant.Filled" Size="Size.Large" FullWidth="true">
+                Manage Participants
+            </MudButton>
+        </MudItem>
+        <MudItem xs="3">
+            <MudButton Class="p-4" Link="ManageQuestions" Variant="Variant.Filled" Size="Size.Large" FullWidth="true">
+                Manage Questions
+            </MudButton>
+        </MudItem>
+        <MudItem xs="3">
+            <MudButton Class="p-4" Link="ManageSchedules" Variant="Variant.Filled" Size="Size.Large" FullWidth="true">
+                Manage Schedules
+            </MudButton>
+        </MudItem>
+        <MudItem xs="3">
+            <MudButton Class="p-4" Link="AnswersCorrection" Variant="Variant.Filled" Size="Size.Large" FullWidth="true">
+                Answers Correction
+            </MudButton>
+        </MudItem>
+    </MudGrid>
 
-    <h2 class="my-4">Participants</h2>
+    <MudText Class="my-4" Typo="Typo.h2">Participants</MudText>
 </AuthorizeView>
 
 <AuthorizeView Roles="Admin, Participant">
     <Authorized>
-        <section class="card-deck">
-            <div class="card">
-                <div class="card-body">
-                    <NavLink href="TestSchedules" class="stretched-link d-block text-center">Test Schedules</NavLink>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <NavLink href="TestResults" class="stretched-link d-block text-center">Test Results</NavLink>
-                </div>
-            </div>
-        </section>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudButton Class="p-4" Link="TestSchedules" Variant="Variant.Filled" Size="Size.Large" FullWidth="true">
+                    Test Schedules
+                </MudButton>
+            </MudItem>
+            <MudItem xs="6">
+                <MudButton Class="p-4" Link="TestResults" Variant="Variant.Filled" Size="Size.Large" FullWidth="true">
+                    Test Results
+                </MudButton>
+            </MudItem>
+        </MudGrid>
     </Authorized>
 
     <NotAuthorized>
-        <section class="card-deck">
-            <div class="card">
-                <div class="card-body">
-                    <NavLink href="Identity/Account/Login" class="stretched-link d-block text-center">Login</NavLink>
-                </div>
-            </div>
-        </section>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudButton Class="p-4" Link="Identity/Account/Login" Variant="Variant.Filled" Size="Size.Large" FullWidth="true">
+                    Login
+                </MudButton>
+            </MudItem>
+        </MudGrid>
     </NotAuthorized>
 </AuthorizeView>

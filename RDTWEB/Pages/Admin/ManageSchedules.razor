@@ -4,63 +4,60 @@
 
 @inject ApplicationDbContext _context
 
-<h3>Manage Schedules</h3>
+<MudText Class="mb-4" Typo="Typo.h3">Manage Schedules</MudText>
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
+<MudSimpleTable Hover="true" Striped="true">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Start At</th>
+        <th>End At</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <Virtualize Items="QuestionSetViewModels">
         <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Start At</th>
-            <th>End At</th>
-            <th>Actions</th>
+            <td class="align-middle">@context.QuestionSet.Id</td>
+            <td class="align-middle">@context.QuestionSet.Title</td>
+            @if (context.IsEditing)
+            {
+                <td class="align-middle">
+                    <input @bind="context.QuestionSet.StartAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control"/>
+                </td>
+                <td class="align-middle">
+                    <input @bind="context.QuestionSet.EndAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control"/>
+                </td>
+                <td class="btn-group align-middle" role="group" aria-label="Actions">
+                    <MudGrid>
+                        <MudItem>
+                            <MudButton OnClick="() => UpdateQuestionSetSchedule(context)" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send">
+                                Submit
+                            </MudButton>
+                        </MudItem>
+                        <MudItem>
+                            <MudButton OnClick="() => context.IsEditing = false" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Cancel">
+                                Cancel
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </td>
+            }
+            else
+            {
+                <td class="align-middle">@(context.QuestionSet.StartAt?.ToString("U") ?? "-")</td>
+                <td class="align-middle">@(context.QuestionSet.EndAt?.ToString("U") ?? "-")</td>
+                <td class="align-middle">
+                    <MudButton OnClick="() => context.IsEditing = true" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit">
+                        Edit
+                    </MudButton>
+                </td>
+            }
         </tr>
-        </thead>
-        <tbody>
-        <Virtualize Items="QuestionSetViewModels">
-            <ItemContent>
-                <tr>
-                    <td class="align-middle">@context.QuestionSet.Id</td>
-                    <td class="align-middle">@context.QuestionSet.Title</td>
-                    @if (context.IsEditing)
-                    {
-                        <td class="align-middle">
-                            <input @bind="context.QuestionSet.StartAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control"/>
-                        </td>
-                        <td class="align-middle">
-                            <input @bind="context.QuestionSet.EndAt" @bind:format="yyyy-MM-ddTHH:mm" type="datetime-local" class="form-control"/>
-                        </td>
-                        <td class="btn-group align-middle" role="group" aria-label="Actions">
-                            <button @onclick="() => UpdateQuestionSetSchedule(context)" class="btn btn-primary">Submit</button>
-                            <button @onclick="() => context.IsEditing = false" class="btn btn-danger">Cancel</button>
-                        </td>
-                    }
-                    else
-                    {
-                        <td class="align-middle">@(context.QuestionSet.StartAt?.ToString("U") ?? "-")</td>
-                        <td class="align-middle">@(context.QuestionSet.EndAt?.ToString("U") ?? "-")</td>
-                        <td class="align-middle">
-                            <button @onclick="() => context.IsEditing = true" class="btn btn-secondary">Edit</button>
-                        </td>
-                    }
-                </tr>
-            </ItemContent>
-            <Placeholder>
-                <tr>
-                    <td colspan="5">
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </Placeholder>
-        </Virtualize>
-        </tbody>
-    </table>
-</div>
+    </Virtualize>
+    </tbody>
+</MudSimpleTable>
 
 @code {
 
