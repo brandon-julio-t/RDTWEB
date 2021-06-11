@@ -35,6 +35,9 @@
     <Content Include="..\Documentation.docx">
       <Link>Documentation.docx</Link>
     </Content>
+    <Content Include="..\README.md">
+      <Link>README.md</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
