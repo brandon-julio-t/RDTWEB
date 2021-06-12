@@ -168,7 +168,7 @@
         }
     }
 
-    private void OnEditingDone()
+    private async Task OnEditingDone()
     {
         IsEditing = false;
 
@@ -176,14 +176,26 @@
         if (IsNew) return;
 
         _context.Update(Question);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
     }
 
-    private void DeleteQuestion()
+    private async Task DeleteQuestion()
     {
-        _context.Remove(Question);
-        _context.SaveChangesAsync();
-        OnDelete.InvokeAsync(Question);
+        try
+        {
+            _context.Remove(Question);
+            await _context.SaveChangesAsync();
+        }
+        catch (InvalidOperationException)
+        {
+    // This error will occur when admin adds a question
+    // then delete it without saving it first.
+        }
+        finally
+        {
+    // Remove question from list despite any error.
+            await OnDelete.InvokeAsync(Question);
+        }
     }
 
 }
